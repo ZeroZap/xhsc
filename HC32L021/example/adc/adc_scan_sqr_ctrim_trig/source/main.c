@@ -1,0 +1,155 @@
+/**
+ *******************************************************************************
+ * @file  main.c
+ * @brief This file provides example of ADC
+ @verbatim
+   Change Logs:
+   Date             Author          Notes
+   2024-12-02       MADS            First version
+   2025-07-08       MADS            Modify ADC IBAS selection, analog setting
+                                    Modify Adc Interrupt Handler Function
+ @endverbatim
+ *******************************************************************************
+ * Copyright (C) 2024~2025, Xiaohua Semiconductor Co., Ltd. All rights reserved.
+ *
+ * This software component is licensed by XHSC under BSD 3-Clause license
+ * (the "License"); You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                    opensource.org/licenses/BSD-3-Clause
+ *
+ *******************************************************************************
+ */
+
+/*******************************************************************************
+ * Include files
+ ******************************************************************************/
+#include "adc.h"
+#include "ctrim.h"
+#include "ddl.h"
+#include "gpio.h"
+/*******************************************************************************
+ * Local type definitions ('typedef')
+ ******************************************************************************/
+/*******************************************************************************
+ * Local pre-processor symbols/macros ('#define')
+ ******************************************************************************/
+/*******************************************************************************
+ * Global variable definitions (declared in header file with 'extern')
+ ******************************************************************************/
+/*******************************************************************************
+ * Local function prototypes ('static')
+ ******************************************************************************/
+static void CtrimConfig(void);
+static void AdcConfig(void);
+/*******************************************************************************
+ * Local variable definitions ('static')
+ ******************************************************************************/
+volatile uint32_t u32AdcResult2;
+volatile uint32_t u32AdcResult3;
+volatile uint32_t u32AdcResult5;
+/*******************************************************************************
+ * Function implementation - global ('extern') and local ('static')
+ ******************************************************************************/
+/**
+ * @brief  Main function
+ * @retval int32_t return value, if needed
+ */
+int32_t main(void)
+{
+    /* CTRIM配置 */
+    CtrimConfig();
+
+    /* ADC配置 */
+    AdcConfig();
+
+    /* 使能CTRIM */
+    CTRIM_Enable();
+
+    while (1)
+    {
+        ;
+    }
+}
+
+/**
+ * @brief  Adc 中断服务程序
+ * @retval None
+ */
+void Adc_IRQHandler(void)
+{
+    /* 等待转换完成 */
+    if (ADC_IntFlagGet(ADC_FLAG_SQR))
+    {
+        /* 清除中断标志 */
+        ADC_IntFlagClear(ADC_FLAG_SQR);
+
+        /* 获取采样值 */
+        u32AdcResult2 = ADC_SqrResultGet(ADC_SQR_CH0_MUX);
+        u32AdcResult3 = ADC_SqrResultGet(ADC_SQR_CH1_MUX);
+        u32AdcResult5 = ADC_SqrResultGet(ADC_SQR_CH2_MUX);
+    }
+}
+
+/**
+ * @brief  ADC相关配置
+ * @retval None
+ */
+static void AdcConfig(void)
+{
+    stc_adc_sqr_init_t stcAdcSqrConfig = {0};
+
+    SYSCTRL_PeriphClockEnable(PeriphClockAdc);
+
+    ADC_Enable();
+
+    /* ADC 初始化配置 */
+    ADC_SqrStcInit(&stcAdcSqrConfig);
+    stcAdcSqrConfig.u32SampCycle     = ADC_SAMPLE_CYCLE_12;   /* ADC采样周期选择 */
+    stcAdcSqrConfig.u32RefVoltage    = ADC_REF_VOL_AVCC;      /* ADC参考电压选择 */
+    stcAdcSqrConfig.u32ClockDiv      = ADC_CLK_DIV8;          /* ADC时钟分频选择 */
+    stcAdcSqrConfig.u32CurrentSelect = ADC_IBAS_LOWEST_POWER; /* ADCIBAS电流选择 */
+    stcAdcSqrConfig.u32SqrCount      = 3;                     /* ADC转换次数配置 */
+
+    ADC_SqrInit(&stcAdcSqrConfig); /* 初始化配置 */
+
+    /* 配置通道和通道输入源 */
+    GPIO_PA02_ANALOG_SET();
+    GPIO_PA03_ANALOG_SET();
+    GPIO_PA05_ANALOG_SET();
+    ADC_ConfigSqrCh(ADC_SQR_CH0_MUX, ADC_INPUT_CH1); /* 配置通道0的输入源来自PA02 */
+    ADC_ConfigSqrCh(ADC_SQR_CH1_MUX, ADC_INPUT_CH2); /* 配置通道1的输入源来自PA03 */
+    ADC_ConfigSqrCh(ADC_SQR_CH2_MUX, ADC_INPUT_CH3); /* 配置通道2的输入源来自PA05 */
+
+    /* 配置外部触发源 */
+    ADC_ExternTrigEnable(ADC_TRIG_CTRIM);
+
+    /* 配置中断 */
+    ADC_IntEnable();
+    EnableNvic(ADC_IRQn, IrqPriorityLevel3, TRUE);
+}
+
+/**
+ * @brief  CTRIM配置
+ * @retval None
+ */
+static void CtrimConfig(void)
+{
+    stc_ctrim_timer_init_t stcCtrimInit = {0};
+
+    /* 开启CTRIM 外设时钟 */
+    SYSCTRL_PeriphClockEnable(PeriphClockCtrim);
+
+    /* 复位CTRIM模块 */
+    SYSCTRL_PeriphReset(PeriphResetCtrim);
+
+    /* CTRIM 初始化配置 */
+    CTRIM_TimerStcInit(&stcCtrimInit);                       /* 结构体变量初始化 */
+    stcCtrimInit.u32Clock       = CTRIM_ACCURATE_CLOCK_PCLK; /* 时钟源选择 */
+    stcCtrimInit.u32ClockDiv    = CTRIM_REF_CLOCK_DIV128;    /* 分频128 */
+    stcCtrimInit.u16ReloadValue = 31250u - 1u;               /* 定时约1s，4000000/128 = 31250 */
+    CTRIM_TimerInit(&stcCtrimInit);
+}
+
+/******************************************************************************
+ * EOF (not truncated)
+ ******************************************************************************/
