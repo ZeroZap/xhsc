@@ -21,10 +21,10 @@
 /*******************************************************************************
  * Include files
  ******************************************************************************/
-#include "ddl.h"
-#include "gpio.h"
-#include "lpuart.h"
-#include "sysctrl.h"
+#include "hc32l021_ddl.h"
+#include "hc32l021_gpio.h"
+#include "hc32l021_lpuart.h"
+#include "hc32l021_sysctrl.h"
 /*******************************************************************************
  * Local type definitions ('typedef')
  ******************************************************************************/
@@ -63,7 +63,7 @@ int32_t main(void)
     /* LPUART配置 */
     LpuartConfig();
 
-    stc_stk_chip_info_t stcChipInfo = {0};
+    stc_stk_chip_info_t stcChipInfo = { 0 };
 
     uint8_t u8Index;
 
@@ -74,28 +74,27 @@ int32_t main(void)
     printf("@ Welcome to use the XHSC MCU !\r\n@ The Chip Info below are:\r\n");
     printf("* %s\r\n", stcChipInfo.pcProductNum);
     printf("* UID - ");
-    for (u8Index = 0; u8Index < 10; u8Index++)
-    {
+    for (u8Index = 0; u8Index < 10; u8Index++) {
         printf("%02X", stcChipInfo.u8UID[u8Index]);
     }
     printf("\r\n");
     printf("* ARM Cortex-M0+ 32-bit, 48MHz\r\n");
-    printf("* %dkB RAM, %dkB FLASH\r\n", stcChipInfo.u32RamSize / 1024, stcChipInfo.u32FlashSize / 1024);
+    printf("* %dkB RAM, %dkB FLASH\r\n", stcChipInfo.u32RamSize / 1024,
+           stcChipInfo.u32FlashSize / 1024);
     printf("* -40 ~ 105C, 1.8V ~ 5.5V\r\n");
 
-    printf("\r\nPlease connect to \"http://www.xhsc.com.cn\" to obtain SDK!\r\n\r\n");
+    printf(
+        "\r\nPlease connect to \"http://www.xhsc.com.cn\" to obtain "
+        "SDK!\r\n\r\n");
 
-    while (1)
-    {
+    while (1) {
         if (STK_USER_KEY_PRESSED()) /* USER KEY 按键检测 */
         {
             STK_LED_ON();
             DDL_Delay1ms(100);
             STK_LED_OFF();
             DDL_Delay1ms(100);
-        }
-        else
-        {
+        } else {
             STK_LED_ON();
             DDL_Delay1ms(500);
             STK_LED_OFF();
@@ -116,15 +115,18 @@ void LpuartConfig(void)
     SYSCTRL_PeriphClockEnable(PeriphClockLpuart1);
 
     /* LPUART 初始化 */
-    LPUART_StcInit(&stcLpuartInit);                                    /* 结构体初始化 */
-    stcLpuartInit.u32TransMode              = LPUART_MODE_TX_RX;       /* 收发模式 */
-    stcLpuartInit.u32FrameLength            = LPUART_FRAME_LEN_8B_PAR; /* 数据8位，奇偶校验1位*/
-    stcLpuartInit.u32Parity                 = LPUART_B8_PARITY_EVEN;   /* 偶校验 */
-    stcLpuartInit.u32StopBits               = LPUART_STOPBITS_1;       /* 1停止位 */
-    stcLpuartInit.u32BaudRateGenSelect      = LPUART_BAUD_NORMAL;      /* 波特率生成选择：用OVER和SCNT产生波特率 */
-    stcLpuartInit.stcBaudRate.u32SclkSelect = LPUART_SCLK_SEL_PCLK;    /* 传输时钟源 */
-    stcLpuartInit.stcBaudRate.u32Sclk       = SYSCTRL_HclkFreqGet();   /* HCLK获取 */
-    stcLpuartInit.stcBaudRate.u32Baud       = 9600;                    /* 波特率 */
+    LPUART_StcInit(&stcLpuartInit);                 /* 结构体初始化 */
+    stcLpuartInit.u32TransMode = LPUART_MODE_TX_RX; /* 收发模式 */
+    stcLpuartInit.u32FrameLength =
+        LPUART_FRAME_LEN_8B_PAR; /* 数据8位，奇偶校验1位*/
+    stcLpuartInit.u32Parity   = LPUART_B8_PARITY_EVEN; /* 偶校验 */
+    stcLpuartInit.u32StopBits = LPUART_STOPBITS_1;     /* 1停止位 */
+    stcLpuartInit.u32BaudRateGenSelect =
+        LPUART_BAUD_NORMAL; /* 波特率生成选择：用OVER和SCNT产生波特率 */
+    stcLpuartInit.stcBaudRate.u32SclkSelect =
+        LPUART_SCLK_SEL_PCLK; /* 传输时钟源 */
+    stcLpuartInit.stcBaudRate.u32Sclk = SYSCTRL_HclkFreqGet(); /* HCLK获取 */
+    stcLpuartInit.stcBaudRate.u32Baud = 9600;                  /* 波特率 */
     LPUART_Init(LPUART1, &stcLpuartInit);
 
     LPUART_IntFlagClearAll(LPUART1); /* 清除所有状态标志 */
@@ -136,7 +138,7 @@ void LpuartConfig(void)
  */
 void GpioConfig(void)
 {
-    stc_gpio_init_t stcGpioInit = {0};
+    stc_gpio_init_t stcGpioInit = { 0 };
 
     SYSCTRL_PeriphClockEnable(PeriphClockGpio);
 

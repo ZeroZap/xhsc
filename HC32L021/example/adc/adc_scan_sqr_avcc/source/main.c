@@ -21,8 +21,8 @@
 /*******************************************************************************
  * Include files
  ******************************************************************************/
-#include "adc.h"
-#include "gpio.h"
+#include "hc32l021_adc.h"
+#include "hc32l021_gpio.h"
 /*******************************************************************************
  * Local type definitions ('typedef')
  ******************************************************************************/
@@ -39,8 +39,8 @@ static void AdcConfig(void);
 /*******************************************************************************
  * Local variable definitions ('static')
  ******************************************************************************/
-uint32_t  u32AdcCH0Result;  /* VCAP Adc值 */
-uint32_t  u32AdcCH1Result;  /* AVCC/3 Adc值 */
+uint32_t u32AdcCH0Result;   /* VCAP Adc值 */
+uint32_t u32AdcCH1Result;   /* AVCC/3 Adc值 */
 float32_t f32AdcAvccResult; /* AVCC值 */
 /*******************************************************************************
  * Function implementation - global ('extern') and local ('static')
@@ -54,14 +54,12 @@ int32_t main(void)
     /* ADC配置 */
     AdcConfig();
 
-    while (1)
-    {
+    while (1) {
         DDL_Delay1ms(2000);
         ADC_SqrStart();
 
         /* 等待转换完成*/
-        if (ADC_IntFlagGet(ADC_FLAG_SQR))
-        {
+        if (ADC_IntFlagGet(ADC_FLAG_SQR)) {
             /* 清除中断标志 */
             ADC_IntFlagClear(ADC_FLAG_SQR);
 
@@ -79,7 +77,7 @@ int32_t main(void)
  */
 static void AdcConfig(void)
 {
-    stc_adc_sqr_init_t stcAdcSqrConfig = {0};
+    stc_adc_sqr_init_t stcAdcSqrConfig = { 0 };
 
     /* 开启 ADC 外设时钟 */
     SYSCTRL_PeriphClockEnable(PeriphClockAdc);
@@ -89,16 +87,19 @@ static void AdcConfig(void)
 
     /* ADC 初始化配置 */
     ADC_SqrStcInit(&stcAdcSqrConfig);
-    stcAdcSqrConfig.u32SampCycle     = ADC_SAMPLE_CYCLE_12;   /* ADC采样周期选择 */
-    stcAdcSqrConfig.u32RefVoltage    = ADC_REF_VOL_AVCC;      /* ADC参考电压选择 */
-    stcAdcSqrConfig.u32ClockDiv      = ADC_CLK_DIV8;          /* ADC时钟分频选择 */
-    stcAdcSqrConfig.u32CurrentSelect = ADC_IBAS_LOWEST_POWER; /* ADC IBAS电流选择 */
-    stcAdcSqrConfig.u32SqrCount      = 2;                     /* ADC转换次数配置 */
-    ADC_SqrInit(&stcAdcSqrConfig);                            /* 初始化配置 */
+    stcAdcSqrConfig.u32SampCycle = ADC_SAMPLE_CYCLE_12; /* ADC采样周期选择 */
+    stcAdcSqrConfig.u32RefVoltage = ADC_REF_VOL_AVCC; /* ADC参考电压选择 */
+    stcAdcSqrConfig.u32ClockDiv = ADC_CLK_DIV8; /* ADC时钟分频选择 */
+    stcAdcSqrConfig.u32CurrentSelect =
+        ADC_IBAS_LOWEST_POWER;       /* ADC IBAS电流选择 */
+    stcAdcSqrConfig.u32SqrCount = 2; /* ADC转换次数配置 */
+    ADC_SqrInit(&stcAdcSqrConfig);   /* 初始化配置 */
 
     /* 配置通道和通道输入源 */
-    ADC_ConfigSqrCh(ADC_SQR_CH0_MUX, ADC_INPUT_CH8); /* 配置通道0的输入源来自VCAP */
-    ADC_ConfigSqrCh(ADC_SQR_CH1_MUX, ADC_INPUT_CH9); /* 配置通道1的输入源来自AVCC/3 */
+    ADC_ConfigSqrCh(
+        ADC_SQR_CH0_MUX, ADC_INPUT_CH8); /* 配置通道0的输入源来自VCAP */
+    ADC_ConfigSqrCh(
+        ADC_SQR_CH1_MUX, ADC_INPUT_CH9); /* 配置通道1的输入源来自AVCC/3 */
 }
 
 /******************************************************************************

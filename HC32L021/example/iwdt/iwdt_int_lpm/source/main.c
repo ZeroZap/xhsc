@@ -21,10 +21,10 @@
 /******************************************************************************
  * Include files
  ******************************************************************************/
-#include "flash.h"
-#include "gpio.h"
-#include "iwdt.h"
-#include "lpm.h"
+#include "hc32l021_flash.h"
+#include "hc32l021_gpio.h"
+#include "hc32l021_iwdt.h"
+#include "hc32l021_lpm.h"
 /*******************************************************************************
  * Local type definitions ('typedef')
  ******************************************************************************/
@@ -55,15 +55,16 @@ int32_t main(void)
     STK_UserKeyConfig(); /* USER KEY配置 */
     IwdtConfig();        /* IWDT配置 */
 
-    while (1)
-    {
+    while (1) {
         if (TRUE == STK_USER_KEY_PRESSED()) /* 等待按键按下 */
         {
             FLASH_LowPowerEnable(); /* 配置FLASH为低功耗模式 */
 
-            GpioLowPowerConfig(); /* 配置Demo板上所有引脚配置为模拟端口(除按键、LED端口外),避免端口漏电 */
+            GpioLowPowerConfig(); /* 配置Demo板上所有引脚配置为模拟端口(除按键、LED端口外),避免端口漏电
+                                   */
 
-            LPM_GotoDeepSleep(TRUE); /* 进入低功耗深度睡眠模式，中断唤醒执行完中断自动进入低功耗模式 */
+            LPM_GotoDeepSleep(TRUE); /* 进入低功耗深度睡眠模式，中断唤醒执行完中断自动进入低功耗模式
+                                      */
         }
     }
 }
@@ -74,8 +75,7 @@ int32_t main(void)
  */
 void Iwdt_IRQHandler(void)
 {
-    if (IWDT_OverFlagGet())
-    {
+    if (IWDT_OverFlagGet()) {
         IWDT_OverFlagClear(); /* 清除IWDT中断标记 */
         STK_LED_ON();
         DDL_Delay1ms(100);
@@ -89,7 +89,7 @@ void Iwdt_IRQHandler(void)
  */
 static void IwdtConfig(void)
 {
-    stc_iwdt_init_t stcIwdtInit = {0};
+    stc_iwdt_init_t stcIwdtInit = { 0 };
 
     /* 结构体初始化 */
     IWDT_StcInit(&stcIwdtInit);

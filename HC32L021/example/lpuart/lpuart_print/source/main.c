@@ -22,18 +22,18 @@
 /*******************************************************************************
  * Include files
  ******************************************************************************/
-#include "ddl.h"
-#include "gpio.h"
-#include "lpm.h"
-#include "lpuart.h"
-#include "sysctrl.h"
+#include "hc32l021_ddl.h"
+#include "hc32l021_gpio.h"
+#include "hc32l021_lpm.h"
+#include "hc32l021_lpuart.h"
+#include "hc32l021_sysctrl.h"
 /*******************************************************************************
  * Local type definitions ('typedef')
  ******************************************************************************/
 /*******************************************************************************
  * Local pre-processor symbols/macros ('#define')
  ******************************************************************************/
-#define BAUD_RATE         (9600u) /* 波特率 */
+#define BAUD_RATE (9600u) /* 波特率 */
 
 #define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
 /*******************************************************************************
@@ -66,8 +66,7 @@ int32_t main(void)
     printf("  ==>> HC32L021 STK \r\n");
     printf("  ==>> www.xhsc.com.cn\r\n\r\n");
 
-    while (1)
-    {
+    while (1) {
         ;
     }
 }
@@ -78,26 +77,28 @@ int32_t main(void)
  */
 static void LpuartConfig(void)
 {
-    uint32_t          u32CalBaudRate = 0u;
-    stc_lpuart_init_t stcLpuartInit  = {0};
+    uint32_t u32CalBaudRate         = 0u;
+    stc_lpuart_init_t stcLpuartInit = { 0 };
 
     /* 外设模块时钟使能 */
     SYSCTRL_PeriphClockEnable(PeriphClockLpuart1);
 
     /* LPUART 初始化 */
-    LPUART_StcInit(&stcLpuartInit);                                    /* 结构体初始化 */
-    stcLpuartInit.u32TransMode              = LPUART_MODE_TX_RX;       /* 收发模式 */
-    stcLpuartInit.u32FrameLength            = LPUART_FRAME_LEN_8B_PAR; /* 数据8位，奇偶校验1位 */
-    stcLpuartInit.u32Parity                 = LPUART_B8_PARITY_EVEN;   /* 偶校验 */
-    stcLpuartInit.u32StopBits               = LPUART_STOPBITS_1;       /* 1停止位 */
-    stcLpuartInit.u32BaudRateGenSelect      = LPUART_BAUD_NORMAL;      /* 波特率生成选择：用OVER和SCNT产生波特率 */
-    stcLpuartInit.stcBaudRate.u32SclkSelect = LPUART_SCLK_SEL_PCLK;    /* 传输时钟源 */
-    stcLpuartInit.stcBaudRate.u32Sclk       = SYSCTRL_HclkFreqGet();   /* HCLK获取 */
-    stcLpuartInit.stcBaudRate.u32Baud       = BAUD_RATE;               /* 波特率 */
-    u32CalBaudRate                          = LPUART_Init(LPUART1, &stcLpuartInit);
+    LPUART_StcInit(&stcLpuartInit);                 /* 结构体初始化 */
+    stcLpuartInit.u32TransMode = LPUART_MODE_TX_RX; /* 收发模式 */
+    stcLpuartInit.u32FrameLength =
+        LPUART_FRAME_LEN_8B_PAR; /* 数据8位，奇偶校验1位 */
+    stcLpuartInit.u32Parity   = LPUART_B8_PARITY_EVEN; /* 偶校验 */
+    stcLpuartInit.u32StopBits = LPUART_STOPBITS_1;     /* 1停止位 */
+    stcLpuartInit.u32BaudRateGenSelect =
+        LPUART_BAUD_NORMAL; /* 波特率生成选择：用OVER和SCNT产生波特率 */
+    stcLpuartInit.stcBaudRate.u32SclkSelect =
+        LPUART_SCLK_SEL_PCLK; /* 传输时钟源 */
+    stcLpuartInit.stcBaudRate.u32Sclk = SYSCTRL_HclkFreqGet(); /* HCLK获取 */
+    stcLpuartInit.stcBaudRate.u32Baud = BAUD_RATE;             /* 波特率 */
+    u32CalBaudRate                    = LPUART_Init(LPUART1, &stcLpuartInit);
 
-    if (0u != u32CalBaudRate)
-    {
+    if (0u != u32CalBaudRate) {
         /* 有效设置，可通过查看u32CalBaudRate的值确认当前计算的波特率 */
     }
 
@@ -110,7 +111,7 @@ static void LpuartConfig(void)
  */
 static void GpioConfig(void)
 {
-    stc_gpio_init_t stcGpioInit = {0};
+    stc_gpio_init_t stcGpioInit = { 0 };
 
     /* 外设模块时钟使能 */
     SYSCTRL_PeriphClockEnable(PeriphClockGpio);

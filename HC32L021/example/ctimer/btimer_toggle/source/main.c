@@ -21,8 +21,8 @@
 /******************************************************************************
  * Include files
  ******************************************************************************/
-#include "btim.h"
-#include "gpio.h"
+#include "hc32l021_btim.h"
+#include "hc32l021_gpio.h"
 /******************************************************************************
  * Local pre-processor symbols/macros ('#define')
  ******************************************************************************/
@@ -67,8 +67,7 @@ int32_t main(void)
 
     BTIM_ToggleEnable(BTIM3); /* TOG输出使能 */
 
-    while (1)
-    {
+    while (1) {
         ;
     }
 }
@@ -81,16 +80,14 @@ void Ctim1_IRQHandler(void)
 {
     static boolean_t bFlag = TRUE;
 
-    if (TRUE == BTIM_IntFlagGet(BTIM3, BTIM_FLAG_UI)) /* 获取BTIM3的溢出中断标志位 */
+    if (TRUE
+        == BTIM_IntFlagGet(BTIM3, BTIM_FLAG_UI)) /* 获取BTIM3的溢出中断标志位 */
     {
-        if (TRUE == bFlag)
-        {
+        if (TRUE == bFlag) {
             STK_LED_ON(); /* LED 开启 */
 
             bFlag = FALSE;
-        }
-        else
-        {
+        } else {
             STK_LED_OFF(); /* LED 关闭*/
 
             bFlag = TRUE;
@@ -106,18 +103,18 @@ void Ctim1_IRQHandler(void)
  */
 static void GpioConfig(void)
 {
-    stc_gpio_init_t stcGpioInit = {0};
+    stc_gpio_init_t stcGpioInit = { 0 };
 
     SYSCTRL_PeriphClockEnable(PeriphClockGpio); /* 开启GPIO时钟 */
 
     /* CTIM1_TOG(PA03)和CTIM1_TOGN(PA04)端口初始化 */
-    GPIO_StcInit(&stcGpioInit);                        /* 结构体变量初始值初始化 */
+    GPIO_StcInit(&stcGpioInit); /* 结构体变量初始值初始化 */
     stcGpioInit.u32Mode   = GPIO_MD_OUTPUT_PP;         /* 端口方向配置 */
     stcGpioInit.u32PullUp = GPIO_PULL_NONE;            /* 端口上拉配置 */
     stcGpioInit.u32Pin    = GPIO_PIN_03 | GPIO_PIN_04; /* 端口引脚配置 */
-    GPIOA_Init(&stcGpioInit);                          /* GPIO 端口初始化 */
-    GPIO_PA03_AF_CTIM1_TOG();                          /* CTIM1_TOG端口复用功能 */
-    GPIO_PA04_AF_CTIM1_TOGN();                         /* CTIM1_TOGN端口复用功能 */
+    GPIOA_Init(&stcGpioInit);  /* GPIO 端口初始化 */
+    GPIO_PA03_AF_CTIM1_TOG();  /* CTIM1_TOG端口复用功能 */
+    GPIO_PA04_AF_CTIM1_TOGN(); /* CTIM1_TOGN端口复用功能 */
 }
 
 /**
@@ -126,21 +123,25 @@ static void GpioConfig(void)
  */
 static void Btim3Config(uint16_t u16Period)
 {
-    stc_btim_init_t stcBtimInit = {0};
+    stc_btim_init_t stcBtimInit = { 0 };
 
-    SYSCTRL_FuncEnable(SYSCTRL_FUNC_CTIMER1_USE_BTIM); /* 配置BTIM3/4/5有效，GTIM1无效 */
-    SYSCTRL_PeriphClockEnable(PeriphClockCtim1);       /* 使能BTIM3/4/5 外设时钟 */
+    SYSCTRL_FuncEnable(
+        SYSCTRL_FUNC_CTIMER1_USE_BTIM); /* 配置BTIM3/4/5有效，GTIM1无效 */
+    SYSCTRL_PeriphClockEnable(PeriphClockCtim1); /* 使能BTIM3/4/5 外设时钟 */
 
-    BTIM_StcInit(&stcBtimInit);                               /* 结构体变量初始值初始化 */
-    stcBtimInit.u32Mode            = BTIM_MD_PCLK;            /* 工作模式: 计数器模式，计数时钟源来自PCLK */
-    stcBtimInit.u32OneShotEn       = BTIM_CONTINUOUS_COUNTER; /* 连续计数模式 */
-    stcBtimInit.u32Prescaler       = BTIM_COUNTER_CLK_DIV256; /* 对计数时钟进行预除频 */
-    stcBtimInit.u32ToggleEn        = BTIM_TOGGLE_DISABLE;     /* TOG输出禁止 */
-    stcBtimInit.u32AutoReloadValue = u16Period - 1;           /* 自动重载寄存ARR赋值,计数周期为PRS*(ARR+1)*TPCLK */
-    BTIM_Init(BTIM3, &stcBtimInit);                           /* BTIM3初始化*/
+    BTIM_StcInit(&stcBtimInit); /* 结构体变量初始值初始化 */
+    stcBtimInit.u32Mode =
+        BTIM_MD_PCLK; /* 工作模式: 计数器模式，计数时钟源来自PCLK */
+    stcBtimInit.u32OneShotEn = BTIM_CONTINUOUS_COUNTER; /* 连续计数模式 */
+    stcBtimInit.u32Prescaler =
+        BTIM_COUNTER_CLK_DIV256; /* 对计数时钟进行预除频 */
+    stcBtimInit.u32ToggleEn = BTIM_TOGGLE_DISABLE; /* TOG输出禁止 */
+    stcBtimInit.u32AutoReloadValue =
+        u16Period - 1; /* 自动重载寄存ARR赋值,计数周期为PRS*(ARR+1)*TPCLK */
+    BTIM_Init(BTIM3, &stcBtimInit); /* BTIM3初始化*/
 
-    BTIM_IntFlagClear(BTIM3, BTIM_FLAG_UI);          /* 清除溢出中断标志位 */
-    BTIM_IntEnable(BTIM3, BTIM_INT_UI);              /* 允许BTIM3溢出中断  */
+    BTIM_IntFlagClear(BTIM3, BTIM_FLAG_UI); /* 清除溢出中断标志位 */
+    BTIM_IntEnable(BTIM3, BTIM_INT_UI);     /* 允许BTIM3溢出中断  */
     EnableNvic(CTIM1_IRQn, IrqPriorityLevel3, TRUE); /* 开启中断 */
 }
 

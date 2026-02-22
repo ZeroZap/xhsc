@@ -22,30 +22,29 @@
 /******************************************************************************
  * Include files
  ******************************************************************************/
-#include "gpio.h"
-#include "iwdt.h"
+#include "hc32l021_gpio.h"
+#include "hc32l021_iwdt.h"
 /*******************************************************************************
  * Local type definitions ('typedef')
  ******************************************************************************/
 /*******************************************************************************
  * Local pre-processor symbols/macros ('#define')
  ******************************************************************************/
-#define LED_BLINK() \
-    do \
-    { \
-        STK_LED_OFF(); \
+#define LED_BLINK()        \
+    do {                   \
+        STK_LED_OFF();     \
         DDL_Delay1ms(100); \
-        STK_LED_ON(); \
+        STK_LED_ON();      \
         DDL_Delay1ms(100); \
-        STK_LED_OFF(); \
+        STK_LED_OFF();     \
         DDL_Delay1ms(100); \
-        STK_LED_ON(); \
+        STK_LED_ON();      \
         DDL_Delay1ms(100); \
-        STK_LED_OFF(); \
+        STK_LED_OFF();     \
         DDL_Delay1ms(100); \
-        STK_LED_ON(); \
+        STK_LED_ON();      \
         DDL_Delay1ms(100); \
-        STK_LED_OFF(); \
+        STK_LED_OFF();     \
     } while (0);
 /*******************************************************************************
  * Global variable definitions (declared in header file with 'extern')
@@ -67,8 +66,7 @@ static void IwdtConfig(void);
 int32_t main(void)
 {
     /* 首次上电先清除RESET标志 */
-    if (TRUE == SYSCTRL_ResetFlagGet(SYSCTRL_RST_POR5V))
-    {
+    if (TRUE == SYSCTRL_ResetFlagGet(SYSCTRL_RST_POR5V)) {
         SYSCTRL_ResetFlagClearAll();
     }
 
@@ -79,8 +77,7 @@ int32_t main(void)
     STK_UserKeyConfig();
 
     /* IWDT 复位现象观测 */
-    if (TRUE == SYSCTRL_ResetFlagGet(SYSCTRL_RST_IWDT))
-    {
+    if (TRUE == SYSCTRL_ResetFlagGet(SYSCTRL_RST_IWDT)) {
         SYSCTRL_ResetFlagClear(SYSCTRL_RST_IWDT);
         LED_BLINK();
     }
@@ -88,15 +85,11 @@ int32_t main(void)
     /* IWDT配置 */
     IwdtConfig();
 
-    while (1)
-    {
+    while (1) {
         /* 溢出前按键按下后执行喂狗程序 */
-        if (!STK_USER_KEY_PRESSED())
-        {
+        if (!STK_USER_KEY_PRESSED()) {
             ;
-        }
-        else
-        {
+        } else {
             IWDT_Feed();
             DDL_Delay1ms(200);
             STK_LED_OFF();
@@ -110,7 +103,7 @@ int32_t main(void)
  */
 static void IwdtConfig(void)
 {
-    stc_iwdt_init_t stcIwdtInit = {0};
+    stc_iwdt_init_t stcIwdtInit = { 0 };
 
     /* 结构体初始化 */
     IWDT_StcInit(&stcIwdtInit);

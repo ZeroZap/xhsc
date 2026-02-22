@@ -21,7 +21,7 @@
 /******************************************************************************
  * Include files
  ******************************************************************************/
-#include "gpio.h"
+#include "hc32l021_gpio.h"
 /*******************************************************************************
  * Local type definitions ('typedef')
  ******************************************************************************/
@@ -51,8 +51,7 @@ int32_t main(void)
 
     STK_LedConfig(); /* LED端口初始化 */
 
-    while (1)
-    {
+    while (1) {
         ;
     }
 }
@@ -80,15 +79,15 @@ void PortA_IRQHandler(void)
  */
 static void GpioUserKeyConfig(void)
 {
-    stc_gpio_init_t stcGpioInit = {0};
+    stc_gpio_init_t stcGpioInit = { 0 };
 
-    GPIO_StcInit(&stcGpioInit);                      /* 结构体变量初始值初始化 */
-    SYSCTRL_PeriphClockEnable(PeriphClockGpio);      /* 打开GPIO外设时钟门控 */
-    stcGpioInit.u32Mode      = GPIO_MD_INT_INPUT;    /* 端口方向配置 */
-    stcGpioInit.u32PullUp    = GPIO_PULL_NONE;       /* 端口上拉配置 */
-    stcGpioInit.u32ExternInt = GPIO_EXTI_LOW;        /* 端口外部中断触发方式配置 */
-    stcGpioInit.u32Pin       = STK_USER_PIN;         /* 端口引脚配置 */
-    GPIOA_Init(&stcGpioInit);                        /* GPIO USER KEY初始化 */
+    GPIO_StcInit(&stcGpioInit); /* 结构体变量初始值初始化 */
+    SYSCTRL_PeriphClockEnable(PeriphClockGpio); /* 打开GPIO外设时钟门控 */
+    stcGpioInit.u32Mode   = GPIO_MD_INT_INPUT; /* 端口方向配置 */
+    stcGpioInit.u32PullUp = GPIO_PULL_NONE;    /* 端口上拉配置 */
+    stcGpioInit.u32ExternInt = GPIO_EXTI_LOW; /* 端口外部中断触发方式配置 */
+    stcGpioInit.u32Pin = STK_USER_PIN; /* 端口引脚配置 */
+    GPIOA_Init(&stcGpioInit);          /* GPIO USER KEY初始化 */
     EnableNvic(PORTA_IRQn, IrqPriorityLevel3, TRUE); /* 使能端口PORTA系统中断 */
 }
 

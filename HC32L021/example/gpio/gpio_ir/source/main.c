@@ -21,8 +21,8 @@
 /******************************************************************************
  * Include files
  ******************************************************************************/
-#include "gpio.h"
-#include "sysctrl.h"
+#include "hc32l021_gpio.h"
+#include "hc32l021_sysctrl.h"
 /*******************************************************************************
  * Local type definitions ('typedef')
  ******************************************************************************/
@@ -52,8 +52,7 @@ int32_t main(void)
 
     DDL_Delay1ms(3000);
 
-    while (1)
-    {
+    while (1) {
         GPIO_PA08_RESET();
         DDL_Delay1ms(50);
 
@@ -72,18 +71,18 @@ static void GpioIrFuncConfig(void)
     SYSCTRL_RCLTrimSet(SYSCTRL_CLK_SRC_RCL_38400); /* 写RCL的TRIM值 */
     SYSCTRL_ClockSrcEnable(SYSCTRL_CLK_SRC_RCL_38400);
 
-    stc_gpio_init_t stcGpioInit = {0};
+    stc_gpio_init_t stcGpioInit = { 0 };
 
     SYSCTRL_PeriphClockEnable(PeriphClockGpio); /*开启GPIO时钟*/
 
     /* 端口初始化 */
-    GPIO_StcInit(&stcGpioInit);                   /* 结构体变量初始值初始化 */
-    stcGpioInit.u32Mode      = GPIO_MD_OUTPUT_PP; /* 端口方向配置 */
-    stcGpioInit.u32PullUp    = GPIO_PULL_NONE;    /* 端口上拉配置 */
-    stcGpioInit.u32Pin       = GPIO_PIN_08;       /* 端口引脚配置 */
-    stcGpioInit.bOutputValue = TRUE;              /* 设置输出端口，端口功能输出为高电平 */
-    GPIOA_Init(&stcGpioInit);                     /* GPIO IR端口初始化 */
-    GPIO_PA08_AF_CTRL1_IR_N_SET();                /* 设置红外信号输出极性 */
+    GPIO_StcInit(&stcGpioInit); /* 结构体变量初始值初始化 */
+    stcGpioInit.u32Mode   = GPIO_MD_OUTPUT_PP; /* 端口方向配置 */
+    stcGpioInit.u32PullUp = GPIO_PULL_NONE;    /* 端口上拉配置 */
+    stcGpioInit.u32Pin    = GPIO_PIN_08;       /* 端口引脚配置 */
+    stcGpioInit.bOutputValue = TRUE; /* 设置输出端口，端口功能输出为高电平 */
+    GPIOA_Init(&stcGpioInit);      /* GPIO IR端口初始化 */
+    GPIO_PA08_AF_CTRL1_IR_N_SET(); /* 设置红外信号输出极性 */
 }
 
 /******************************************************************************

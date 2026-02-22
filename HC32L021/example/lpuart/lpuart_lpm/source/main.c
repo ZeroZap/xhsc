@@ -22,11 +22,11 @@
 /*******************************************************************************
  * Include files
  ******************************************************************************/
-#include "ddl.h"
-#include "gpio.h"
-#include "lpm.h"
-#include "lpuart.h"
-#include "sysctrl.h"
+#include "hc32l021_ddl.h"
+#include "hc32l021_gpio.h"
+#include "hc32l021_lpm.h"
+#include "hc32l021_lpuart.h"
+#include "hc32l021_sysctrl.h"
 /*******************************************************************************
  * Local type definitions ('typedef')
  ******************************************************************************/
@@ -74,8 +74,7 @@ int32_t main(void)
     /* 本样例程序会进入深度休眠模式，因此以下代码起防护作用*/
     /* （防止进入深度休眠后芯片调试功能不能再次使用） */
     /* 在使用本样例时，禁止在没有唤醒机制的情况下删除以下代码 */
-    while (!STK_USER_KEY_PRESSED())
-    {
+    while (!STK_USER_KEY_PRESSED()) {
         ;
     }
 
@@ -85,8 +84,7 @@ int32_t main(void)
     /* 进入深度休眠模式 */
     LPM_GotoDeepSleep(TRUE);
 
-    while (1)
-    {
+    while (1) {
         ;
     }
 }
@@ -97,17 +95,14 @@ int32_t main(void)
  */
 void LpUart1_IRQHandler(void)
 {
-    if (LPUART_IntFlagGet(LPUART1, LPUART_FLAG_FE))
-    {
+    if (LPUART_IntFlagGet(LPUART1, LPUART_FLAG_FE)) {
         LPUART_IntFlagClear(LPUART1, LPUART_FLAG_FE); /* 清帧错误请求 */
     }
-    if (LPUART_IntFlagGet(LPUART1, LPUART_FLAG_PE))
-    {
+    if (LPUART_IntFlagGet(LPUART1, LPUART_FLAG_PE)) {
         LPUART_IntFlagClear(LPUART1, LPUART_FLAG_PE); /* 清奇偶检验错误请求 */
     }
 
-    if (LPUART_IntFlagGet(LPUART1, LPUART_FLAG_TC))
-    {
+    if (LPUART_IntFlagGet(LPUART1, LPUART_FLAG_TC)) {
         LPUART_IntFlagClear(LPUART1, LPUART_FLAG_TC); /* 清发送中断请求 */
 
         LPUART_IntDisable(LPUART1, LPUART_INT_TC); /* 关闭发送中断 */
@@ -121,8 +116,7 @@ void LpUart1_IRQHandler(void)
 
         LPUART_IntDisable(LPUART1, LPUART_INT_RC); /* 关闭接收中断 */
         LPUART_IntEnable(LPUART1, LPUART_INT_TC);  /* 使能发送中断 */
-        while (FALSE == LPUART_IntFlagGet(LPUART1, LPUART_FLAG_TXE))
-        {
+        while (FALSE == LPUART_IntFlagGet(LPUART1, LPUART_FLAG_TXE)) {
             ;
         }
         LPUART_DataTransmit(LPUART1, u8RxData); /* 将接收的数据发出*/
@@ -135,8 +129,8 @@ void LpUart1_IRQHandler(void)
  */
 static void LpuartConfig(void)
 {
-    uint32_t          u32CalBaudRate = 0u;
-    stc_lpuart_init_t stcLpuartInit  = {0};
+    uint32_t u32CalBaudRate         = 0u;
+    stc_lpuart_init_t stcLpuartInit = { 0 };
 
     /* 外设模块时钟使能 */
     SYSCTRL_PeriphClockEnable(PeriphClockLpuart1);
@@ -145,21 +139,22 @@ static void LpuartConfig(void)
     SYSCTRL_ClockSrcEnable(SYSCTRL_CLK_SRC_XTL);
 
     /* LPUART 初始化 */
-    LPUART_StcInit(&stcLpuartInit);                               /* 结构体初始化 */
-    stcLpuartInit.u32TransMode         = LPUART_MODE_TX_RX;       /* 收发模式 */
-    stcLpuartInit.u32FrameLength       = LPUART_FRAME_LEN_8B_PAR; /* 数据8位，奇偶校验1位 */
-    stcLpuartInit.u32Parity            = LPUART_B8_PARITY_EVEN;   /* 偶校验 */
-    stcLpuartInit.u32StopBits          = LPUART_STOPBITS_1;       /* 1停止位 */
-    stcLpuartInit.u32BaudRateGenSelect = LPUART_XTL_BAUD_9600;    /* 波特率生成选择：XTL生成9600bps */
-    u32CalBaudRate                     = LPUART_Init(LPUART1, &stcLpuartInit);
+    LPUART_StcInit(&stcLpuartInit);                 /* 结构体初始化 */
+    stcLpuartInit.u32TransMode = LPUART_MODE_TX_RX; /* 收发模式 */
+    stcLpuartInit.u32FrameLength =
+        LPUART_FRAME_LEN_8B_PAR; /* 数据8位，奇偶校验1位 */
+    stcLpuartInit.u32Parity   = LPUART_B8_PARITY_EVEN; /* 偶校验 */
+    stcLpuartInit.u32StopBits = LPUART_STOPBITS_1;     /* 1停止位 */
+    stcLpuartInit.u32BaudRateGenSelect =
+        LPUART_XTL_BAUD_9600; /* 波特率生成选择：XTL生成9600bps */
+    u32CalBaudRate = LPUART_Init(LPUART1, &stcLpuartInit);
 
-    if (0u != u32CalBaudRate)
-    {
+    if (0u != u32CalBaudRate) {
         /* 有效设置，可通过查看u32CalBaudRate的值确认当前计算的波特率 */
     }
 
-    LPUART_IntFlagClearAll(LPUART1);                   /* 清除所有状态标志 */
-    LPUART_IntEnable(LPUART1, LPUART_INT_RC);          /* 使能接收中断 */
+    LPUART_IntFlagClearAll(LPUART1);          /* 清除所有状态标志 */
+    LPUART_IntEnable(LPUART1, LPUART_INT_RC); /* 使能接收中断 */
     EnableNvic(LPUART1_IRQn, IrqPriorityLevel3, TRUE); /* 系统中断使能 */
 }
 
@@ -169,7 +164,7 @@ static void LpuartConfig(void)
  */
 static void GpioConfig(void)
 {
-    stc_gpio_init_t stcGpioInit = {0};
+    stc_gpio_init_t stcGpioInit = { 0 };
 
     /* 外设模块时钟使能 */
     SYSCTRL_PeriphClockEnable(PeriphClockGpio);

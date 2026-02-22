@@ -21,11 +21,11 @@
 /******************************************************************************
  * Include files
  ******************************************************************************/
-#include "ctrim.h"
-#include "ddl.h"
-#include "flash.h"
-#include "gpio.h"
-#include "lpm.h"
+#include "hc32l021_ctrim.h"
+#include "hc32l021_ddl.h"
+#include "hc32l021_flash.h"
+#include "hc32l021_gpio.h"
+#include "hc32l021_lpm.h"
 /*******************************************************************************
  * Local type definitions ('typedef')
  ******************************************************************************/
@@ -79,12 +79,13 @@ int32_t main(void)
 
     FLASH_LowPowerEnable(); /* 配置FLASH为低功耗模式 */
 
-    GpioLowPowerConfig(); /* 配置Demo板上所有不使用的IO为输入下拉,避免端口漏电 */
+    GpioLowPowerConfig(); /* 配置Demo板上所有不使用的IO为输入下拉,避免端口漏电
+                           */
 
-    LPM_GotoDeepSleep(TRUE); /* 进入低功耗模式——深度休眠（使能唤醒后退出中断自动休眠特性） */
+    LPM_GotoDeepSleep(
+        TRUE); /* 进入低功耗模式——深度休眠（使能唤醒后退出中断自动休眠特性） */
 
-    while (1)
-    {
+    while (1) {
         ;
     }
 }
@@ -97,18 +98,14 @@ void Ctrim_Clkdet_IRQHandler(void)
 {
     static boolean_t bFlag = FALSE;
 
-    if (TRUE == CTRIM_FlagGet(CTRIM_FLAG_UD))
-    {
+    if (TRUE == CTRIM_FlagGet(CTRIM_FLAG_UD)) {
         CTRIM_FlagClear(CTRIM_FLAG_UD); /* 清除标志位 */
 
         /* LED灯按定时时间切换输出ON/OFF */
-        if (TRUE == bFlag)
-        {
+        if (TRUE == bFlag) {
             STK_LED_OFF(); /* 关闭LED */
             bFlag = FALSE;
-        }
-        else
-        {
+        } else {
             STK_LED_ON(); /* 开启LED */
             bFlag = TRUE;
         }
@@ -121,9 +118,11 @@ void Ctrim_Clkdet_IRQHandler(void)
  */
 static void CtrimClockConfig(void)
 {
-    SYSCTRL_XTLDrvConfig(SYSCTRL_XTL_AMP3, SYSCTRL_XTL_DRV3); /* 设置XTL晶振参数，使能目标时钟，SYSTEM_XTL = 32768Hz */
-    SYSCTRL_XTLStableTimeSet(SYSCTRL_XTL_STB_CYCLE16384);     /* 置XTL稳定等待时间 */
-    SYSCTRL_ClockSrcEnable(SYSCTRL_CLK_SRC_XTL);              /* 使能XTL时钟 */
+    SYSCTRL_XTLDrvConfig(SYSCTRL_XTL_AMP3, SYSCTRL_XTL_DRV3); /* 设置XTL晶振参数，使能目标时钟，SYSTEM_XTL
+                                                                 = 32768Hz */
+    SYSCTRL_XTLStableTimeSet(
+        SYSCTRL_XTL_STB_CYCLE16384);             /* 置XTL稳定等待时间 */
+    SYSCTRL_ClockSrcEnable(SYSCTRL_CLK_SRC_XTL); /* 使能XTL时钟 */
 }
 
 /**
@@ -132,22 +131,24 @@ static void CtrimClockConfig(void)
  */
 static void CtrimTimerConfig(void)
 {
-    stc_ctrim_timer_init_t stcCtrimInit = {0};
+    stc_ctrim_timer_init_t stcCtrimInit = { 0 };
 
     SYSCTRL_PeriphClockEnable(PeriphClockCtrim); /* 开启CTRIM 外设时钟 */
     SYSCTRL_PeriphReset(PeriphResetCtrim);       /* 复位CTRIM模块 */
 
     /* CTRIM 初始化配置 */
-    CTRIM_TimerStcInit(&stcCtrimInit);                      /* 结构体变量初始值初始化 */
-    stcCtrimInit.u32Clock       = CTRIM_ACCURATE_CLOCK_XTL; /* 时钟源选择XTL 32768Hz */
-    stcCtrimInit.u32ClockDiv    = CTRIM_REF_CLOCK_DIV2;     /* 分频2 */
-    stcCtrimInit.u16ReloadValue = 16384 - 1;                /* 定时约1s，32768/2 = 16384 */
-    CTRIM_TimerInit(&stcCtrimInit);                         /* CTRIM Timer初始化 */
+    CTRIM_TimerStcInit(&stcCtrimInit); /* 结构体变量初始值初始化 */
+    stcCtrimInit.u32Clock =
+        CTRIM_ACCURATE_CLOCK_XTL; /* 时钟源选择XTL 32768Hz */
+    stcCtrimInit.u32ClockDiv    = CTRIM_REF_CLOCK_DIV2; /* 分频2 */
+    stcCtrimInit.u16ReloadValue = 16384 - 1; /* 定时约1s，32768/2 = 16384 */
+    CTRIM_TimerInit(&stcCtrimInit);          /* CTRIM Timer初始化 */
 
     CTRIM_FlagClearALL(); /* 清除所有标志位 */
 
-    CTRIM_IntEnable(CTRIM_INT_UD);                          /* 计数器下溢中断 使能 */
-    EnableNvic(CTRIM_CLKDET_IRQn, IrqPriorityLevel3, TRUE); /* 使能并配置CTRIM 系统中断 */
+    CTRIM_IntEnable(CTRIM_INT_UD); /* 计数器下溢中断 使能 */
+    EnableNvic(CTRIM_CLKDET_IRQn, IrqPriorityLevel3,
+               TRUE); /* 使能并配置CTRIM 系统中断 */
 }
 
 /**
@@ -156,7 +157,7 @@ static void CtrimTimerConfig(void)
  */
 static void GpioLowPowerConfig(void)
 {
-    SYSCTRL_PeriphClockEnable(PeriphClockGpio);  /* 打开GPIO外设时钟门控 */
+    SYSCTRL_PeriphClockEnable(PeriphClockGpio); /* 打开GPIO外设时钟门控 */
     SYSCTRL_FuncEnable(SYSCTRL_FUNC_SWD_USE_IO); /* SWD切换为GPIO */
 
     GPIOA->ADS = 0xEFFEu; /* 配置为模拟端口(除按键、LED端口外)*/

@@ -22,9 +22,9 @@
 /*******************************************************************************
  * Include files
  ******************************************************************************/
-#include "adc.h"
-#include "gpio.h"
-#include "lpuart.h"
+#include "hc32l021_adc.h"
+#include "hc32l021_gpio.h"
+#include "hc32l021_lpuart.h"
 /*******************************************************************************
  * Local type definitions ('typedef')
  ******************************************************************************/
@@ -65,8 +65,7 @@ int32_t main(void)
     /* ADC 配置 */
     AdcConfig();
 
-    while (1)
-    {
+    while (1) {
         ;
     }
 }
@@ -80,8 +79,7 @@ void Adc_IRQHandler(void)
     float32_t f32temp1, f32temp2, f32temp3;
 
     /* 等待转换完成 */
-    if (ADC_IntFlagGet(ADC_FLAG_SQR))
-    {
+    if (ADC_IntFlagGet(ADC_FLAG_SQR)) {
         /* 清除中断标志 */
         ADC_IntFlagClear(ADC_FLAG_SQR);
 
@@ -104,12 +102,10 @@ void Adc_IRQHandler(void)
  */
 void LpUart0_IRQHandler(void)
 {
-    if (LPUART_IntFlagGet(LPUART0, LPUART_FLAG_FE))
-    {
+    if (LPUART_IntFlagGet(LPUART0, LPUART_FLAG_FE)) {
         LPUART_IntFlagClear(LPUART0, LPUART_FLAG_FE); /* 清帧错误请求 */
     }
-    if (LPUART_IntFlagGet(LPUART0, LPUART_FLAG_PE))
-    {
+    if (LPUART_IntFlagGet(LPUART0, LPUART_FLAG_PE)) {
         LPUART_IntFlagClear(LPUART0, LPUART_FLAG_PE); /* 清奇偶检验错误请求 */
     }
 
@@ -131,20 +127,23 @@ static void LpuartConfig(void)
     SYSCTRL_PeriphClockEnable(PeriphClockLpuart0);
 
     /* LPUART 初始化 */
-    LPUART_StcInit(&stcLpuartInit);                                    /* 结构体初始化 */
-    stcLpuartInit.u32TransMode              = LPUART_MODE_TX_RX;       /* 收发模式 */
-    stcLpuartInit.u32FrameLength            = LPUART_FRAME_LEN_8B_PAR; /* 数据8位，奇偶校验1位 */
-    stcLpuartInit.u32Parity                 = LPUART_B8_PARITY_EVEN;   /* 偶校验 */
-    stcLpuartInit.u32StopBits               = LPUART_STOPBITS_1;       /* 1停止位 */
-    stcLpuartInit.u32BaudRateGenSelect      = LPUART_BAUD_NORMAL;      /* 波特率生成选择：用OVER和SCNT产生波特率 */
-    stcLpuartInit.stcBaudRate.u32SclkSelect = LPUART_SCLK_SEL_PCLK;    /* 传输时钟源 */
-    stcLpuartInit.stcBaudRate.u32Sclk       = SYSCTRL_HclkFreqGet();   /* HCLK获取 */
-    stcLpuartInit.stcBaudRate.u32Baud       = 9600;                    /* 波特率 */
+    LPUART_StcInit(&stcLpuartInit);                 /* 结构体初始化 */
+    stcLpuartInit.u32TransMode = LPUART_MODE_TX_RX; /* 收发模式 */
+    stcLpuartInit.u32FrameLength =
+        LPUART_FRAME_LEN_8B_PAR; /* 数据8位，奇偶校验1位 */
+    stcLpuartInit.u32Parity   = LPUART_B8_PARITY_EVEN; /* 偶校验 */
+    stcLpuartInit.u32StopBits = LPUART_STOPBITS_1;     /* 1停止位 */
+    stcLpuartInit.u32BaudRateGenSelect =
+        LPUART_BAUD_NORMAL; /* 波特率生成选择：用OVER和SCNT产生波特率 */
+    stcLpuartInit.stcBaudRate.u32SclkSelect =
+        LPUART_SCLK_SEL_PCLK; /* 传输时钟源 */
+    stcLpuartInit.stcBaudRate.u32Sclk = SYSCTRL_HclkFreqGet(); /* HCLK获取 */
+    stcLpuartInit.stcBaudRate.u32Baud = 9600;                  /* 波特率 */
     LPUART_Init(LPUART0, &stcLpuartInit);
 
-    LPUART_IntFlagClearAll(LPUART0);                   /* 清除所有状态标志 */
-    LPUART_IntEnable(LPUART0, LPUART_INT_RC);          /* 使能接收中断 */
-    LPUART_IntDisable(LPUART0, LPUART_INT_TC);         /* 关闭发送中断 */
+    LPUART_IntFlagClearAll(LPUART0);           /* 清除所有状态标志 */
+    LPUART_IntEnable(LPUART0, LPUART_INT_RC);  /* 使能接收中断 */
+    LPUART_IntDisable(LPUART0, LPUART_INT_TC); /* 关闭发送中断 */
     EnableNvic(LPUART0_IRQn, IrqPriorityLevel3, TRUE); /* 系统中断使能 */
 }
 
@@ -157,7 +156,7 @@ static void GpioConfig(void)
     /* 打开GPIO外设时钟门控 */
     SYSCTRL_PeriphClockEnable(PeriphClockGpio);
 
-    stc_gpio_init_t stcGpioInit = {0};
+    stc_gpio_init_t stcGpioInit = { 0 };
 
     /* 配置PA11为LPUART0_TX */
     GPIO_StcInit(&stcGpioInit);
@@ -182,7 +181,7 @@ static void GpioConfig(void)
  */
 static void AdcConfig(void)
 {
-    stc_adc_sqr_init_t stcAdcSqrConfig = {0};
+    stc_adc_sqr_init_t stcAdcSqrConfig = { 0 };
 
     /* 开启 ADC 外设时钟 */
     SYSCTRL_PeriphClockEnable(PeriphClockAdc);
@@ -192,20 +191,24 @@ static void AdcConfig(void)
 
     /* ADC 初始化配置 */
     ADC_SqrStcInit(&stcAdcSqrConfig);
-    stcAdcSqrConfig.u32SampCycle     = ADC_SAMPLE_CYCLE_12;   /* ADC采样周期选择 */
-    stcAdcSqrConfig.u32RefVoltage    = ADC_REF_VOL_AVCC;      /* ADC参考电压选择 */
-    stcAdcSqrConfig.u32ClockDiv      = ADC_CLK_DIV8;          /* ADC时钟分频选择 */
-    stcAdcSqrConfig.u32CurrentSelect = ADC_IBAS_LOWEST_POWER; /* ADC IBAS电流选择 */
-    stcAdcSqrConfig.u32SqrCount      = 3;                     /* ADC转换次数配置 */
-    ADC_SqrInit(&stcAdcSqrConfig);                            /* 初始化配置 */
+    stcAdcSqrConfig.u32SampCycle = ADC_SAMPLE_CYCLE_12; /* ADC采样周期选择 */
+    stcAdcSqrConfig.u32RefVoltage = ADC_REF_VOL_AVCC; /* ADC参考电压选择 */
+    stcAdcSqrConfig.u32ClockDiv = ADC_CLK_DIV8; /* ADC时钟分频选择 */
+    stcAdcSqrConfig.u32CurrentSelect =
+        ADC_IBAS_LOWEST_POWER;       /* ADC IBAS电流选择 */
+    stcAdcSqrConfig.u32SqrCount = 3; /* ADC转换次数配置 */
+    ADC_SqrInit(&stcAdcSqrConfig);   /* 初始化配置 */
 
     /* 配置通道和通道输入源 */
     GPIO_PA02_ANALOG_SET();
     GPIO_PA03_ANALOG_SET();
     GPIO_PA05_ANALOG_SET();
-    ADC_ConfigSqrCh(ADC_SQR_CH0_MUX, ADC_INPUT_CH1); /* 配置通道0的输入源来自PA02 */
-    ADC_ConfigSqrCh(ADC_SQR_CH1_MUX, ADC_INPUT_CH2); /* 配置通道1的输入源来自PA03 */
-    ADC_ConfigSqrCh(ADC_SQR_CH2_MUX, ADC_INPUT_CH3); /* 配置通道3的输入源来自PA05 */
+    ADC_ConfigSqrCh(
+        ADC_SQR_CH0_MUX, ADC_INPUT_CH1); /* 配置通道0的输入源来自PA02 */
+    ADC_ConfigSqrCh(
+        ADC_SQR_CH1_MUX, ADC_INPUT_CH2); /* 配置通道1的输入源来自PA03 */
+    ADC_ConfigSqrCh(
+        ADC_SQR_CH2_MUX, ADC_INPUT_CH3); /* 配置通道3的输入源来自PA05 */
 
     /* 配置外部触发源 */
     ADC_ExternTrigEnable(ADC_TRIG_LPUART0);

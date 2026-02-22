@@ -21,9 +21,9 @@
 /*******************************************************************************
  * Include files
  ******************************************************************************/
-#include "flash.h"
-#include "gpio.h"
-#include "sysctrl.h"
+#include "hc32l021_flash.h"
+#include "hc32l021_gpio.h"
+#include "hc32l021_sysctrl.h"
 /*******************************************************************************
  * Local type definitions ('typedef')
  ******************************************************************************/
@@ -59,7 +59,8 @@ int32_t main(void)
     /* =============================================== */
     /* ==============       WARNING       ============ */
     /* =============================================== */
-    /* 因本样例使用PA14（SWCLK）输出时钟，为了避免程序再次下载出现问题，请勿删除延时DDL_Delay1ms函数调用 */
+    /* 因本样例使用PA14（SWCLK）输出时钟，为了避免程序再次下载出现问题，请勿删除延时DDL_Delay1ms函数调用
+     */
     DDL_Delay1ms(2000u);
 
     /* 配置Hclk分频时钟信号从IO口输出 */
@@ -71,9 +72,9 @@ int32_t main(void)
     }
     DDL_Delay1ms(200u);
     /* RC48M 32MHz作为Hclk时钟源 */
-    FLASH_WaitCycle(FLASH_WAIT_CYCLE1);                /* Flash wait cycle = 1 */
+    FLASH_WaitCycle(FLASH_WAIT_CYCLE1); /* Flash wait cycle = 1 */
     SYSCTRL_SysClockSwitch(SYSCTRL_CLK_SRC_RC48M_32M); /* 切换RC48M 32M输出 */
-    SystemCoreClockUpdate();                           /* 更新Core时钟（HCLK）*/
+    SystemCoreClockUpdate(); /* 更新Core时钟（HCLK）*/
 
     while (!STK_USER_KEY_PRESSED()) /* 等待按键按下 */
     {
@@ -81,9 +82,9 @@ int32_t main(void)
     }
     DDL_Delay1ms(200u);
     /* RC48M 48MHz作为Hclk时钟源 */
-    FLASH_WaitCycle(FLASH_WAIT_CYCLE1);                /* Flash wait cycle = 1 */
+    FLASH_WaitCycle(FLASH_WAIT_CYCLE1); /* Flash wait cycle = 1 */
     SYSCTRL_SysClockSwitch(SYSCTRL_CLK_SRC_RC48M_48M); /* 切换RC48M 48M输出 */
-    SystemCoreClockUpdate();                           /* 更新Core时钟（HCLK）*/
+    SystemCoreClockUpdate(); /* 更新Core时钟（HCLK）*/
 
     while (!STK_USER_KEY_PRESSED()) /* 等待按键按下 */
     {
@@ -93,7 +94,7 @@ int32_t main(void)
     /* RC48M 4MHz作为Hclk时钟源 */
     SYSCTRL_SysClockSwitch(SYSCTRL_CLK_SRC_RC48M_4M); /* 切换RC48M 4M输出 */
     FLASH_WaitCycle(FLASH_WAIT_CYCLE0);               /* Flash wait cycle = 0 */
-    SystemCoreClockUpdate();                          /* 更新Core时钟（HCLK）*/
+    SystemCoreClockUpdate(); /* 更新Core时钟（HCLK）*/
 
     while (!STK_USER_KEY_PRESSED()) /* 等待按键按下 */
     {
@@ -102,16 +103,13 @@ int32_t main(void)
     DDL_Delay1ms(200u);
     /* 使用从PA11输入的EXTH时钟作为Hclk时钟源 */
     SYSCTRL_ClockSrcEnable(SYSCTRL_CLK_SRC_EXTH); /* 使能EXTH输出 */
-    if (SYSTEM_EXTH <= 24000000)
-    {
+    if (SYSTEM_EXTH <= 24000000) {
         FLASH_WaitCycle(FLASH_WAIT_CYCLE0); /* Flash wait cycle = 0 */
-    }
-    else
-    {
+    } else {
         FLASH_WaitCycle(FLASH_WAIT_CYCLE1); /* Flash wait cycle = 1 */
     }
-    SYSCTRL_SysClockSwitch(SYSCTRL_CLK_SRC_EXTH);      /* 切换EXTH输出 */
-    SystemCoreClockUpdate();                           /* 更新Core时钟（HCLK）*/
+    SYSCTRL_SysClockSwitch(SYSCTRL_CLK_SRC_EXTH); /* 切换EXTH输出 */
+    SystemCoreClockUpdate(); /* 更新Core时钟（HCLK）*/
     SYSCTRL_ClockSrcDisable(SYSCTRL_CLK_SRC_RC48M_4M); /* 关闭RC48M 4M输出 */
 
     while (!STK_USER_KEY_PRESSED()) /* 等待按键按下 */
@@ -122,9 +120,9 @@ int32_t main(void)
     /* RCL 32768作为Hclk时钟源  */
     SYSCTRL_ClockSrcEnable(SYSCTRL_CLK_SRC_RCL_32768); /* 使能RCL输出 */
     SYSCTRL_SysClockSwitch(SYSCTRL_CLK_SRC_RCL_32768); /* 切换RCL 32768输出 */
-    FLASH_WaitCycle(FLASH_WAIT_CYCLE0);                /* Flash wait cycle = 0 */
-    SystemCoreClockUpdate();                           /* 更新Core时钟（HCLK）*/
-    SYSCTRL_ClockSrcDisable(SYSCTRL_CLK_SRC_EXTH);     /* 关闭EXTH输出 */
+    FLASH_WaitCycle(FLASH_WAIT_CYCLE0); /* Flash wait cycle = 0 */
+    SystemCoreClockUpdate();            /* 更新Core时钟（HCLK）*/
+    SYSCTRL_ClockSrcDisable(SYSCTRL_CLK_SRC_EXTH); /* 关闭EXTH输出 */
 
     while (!STK_USER_KEY_PRESSED()) /* 等待按键按下 */
     {
@@ -133,7 +131,7 @@ int32_t main(void)
     DDL_Delay1ms(200u);
     /* RCL 38400作为Hclk时钟源  */
     SYSCTRL_SysClockSwitch(SYSCTRL_CLK_SRC_RCL_38400); /* 切换RCL 38400输出 */
-    SystemCoreClockUpdate();                           /* 更新Core时钟（HCLK）*/
+    SystemCoreClockUpdate(); /* 更新Core时钟（HCLK）*/
 
     while (!STK_USER_KEY_PRESSED()) /* 等待按键按下 */
     {
@@ -141,9 +139,9 @@ int32_t main(void)
     }
     DDL_Delay1ms(200u);
     /* XTL作为Hclk时钟源  */
-    SYSCTRL_ClockSrcEnable(SYSCTRL_CLK_SRC_XTL);        /* 使能XTL输出 */
-    SYSCTRL_SysClockSwitch(SYSCTRL_CLK_SRC_XTL);        /* 切换XTL输出 */
-    SystemCoreClockUpdate();                            /* 更新Core时钟（HCLK）*/
+    SYSCTRL_ClockSrcEnable(SYSCTRL_CLK_SRC_XTL); /* 使能XTL输出 */
+    SYSCTRL_SysClockSwitch(SYSCTRL_CLK_SRC_XTL); /* 切换XTL输出 */
+    SystemCoreClockUpdate();                     /* 更新Core时钟（HCLK）*/
     SYSCTRL_ClockSrcDisable(SYSCTRL_CLK_SRC_RCL_38400); /* 关闭RCL输出 */
 
     while (!STK_USER_KEY_PRESSED()) /* 等待按键按下 */
@@ -154,11 +152,10 @@ int32_t main(void)
     /* RC48M 4M作为Hclk时钟源  */
     SYSCTRL_ClockSrcEnable(SYSCTRL_CLK_SRC_RC48M_4M); /* 使能RC48M 4M输出 */
     SYSCTRL_SysClockSwitch(SYSCTRL_CLK_SRC_RC48M_4M); /* 切换RC48M 4M输出 */
-    SystemCoreClockUpdate();                          /* 更新Core时钟（HCLK）*/
-    SYSCTRL_ClockSrcDisable(SYSCTRL_CLK_SRC_XTL);     /* 关闭XTL输出 */
+    SystemCoreClockUpdate(); /* 更新Core时钟（HCLK）*/
+    SYSCTRL_ClockSrcDisable(SYSCTRL_CLK_SRC_XTL); /* 关闭XTL输出 */
 
-    while (1)
-    {
+    while (1) {
         ;
     }
 }
@@ -169,14 +166,15 @@ int32_t main(void)
  */
 static void SysClockConfig(void)
 {
-    stc_sysctrl_clock_init_t stcSysClockInit = {0};
+    stc_sysctrl_clock_init_t stcSysClockInit = { 0 };
 
     /* 结构体初始化 */
     SYSCTRL_ClockStcInit(&stcSysClockInit);
 
-    stcSysClockInit.u32SysClockSrc = SYSCTRL_CLK_SRC_RC48M_6M; /* 选择系统默认RC48M 6MHz作为Hclk时钟源 */
-    stcSysClockInit.u32HclkDiv     = SYSCTRL_HCLK_PRS_DIV1;    /* Hclk 1分频 */
-    SYSCTRL_ClockInit(&stcSysClockInit);                       /* 系统时钟初始化 */
+    stcSysClockInit.u32SysClockSrc =
+        SYSCTRL_CLK_SRC_RC48M_6M; /* 选择系统默认RC48M 6MHz作为Hclk时钟源 */
+    stcSysClockInit.u32HclkDiv = SYSCTRL_HCLK_PRS_DIV1; /* Hclk 1分频 */
+    SYSCTRL_ClockInit(&stcSysClockInit); /* 系统时钟初始化 */
 }
 
 /**
@@ -185,7 +183,7 @@ static void SysClockConfig(void)
  */
 static void GpioConfig(void)
 {
-    stc_gpio_init_t stcGpioInit = {0};
+    stc_gpio_init_t stcGpioInit = { 0 };
 
     /* 结构体初始化 */
     GPIO_StcInit(&stcGpioInit);

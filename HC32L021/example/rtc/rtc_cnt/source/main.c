@@ -21,8 +21,8 @@
 /******************************************************************************
  * Include files
  ******************************************************************************/
-#include "rtc.h"
-#include "sysctrl.h"
+#include "hc32l021_rtc.h"
+#include "hc32l021_sysctrl.h"
 /******************************************************************************
  * Local type definitions ('typedef')
  ******************************************************************************/
@@ -40,8 +40,8 @@ static void RtcConfig(void);
  * Local variable definitions ('static')                                      *
  ******************************************************************************/
 static stc_rtc_time_t stcReadTime;
-volatile uint8_t      u8Flag;
-volatile uint8_t      u8Second, u8Minute, u8Hour, u8Day, u8Week, u8Month, u8Year;
+volatile uint8_t u8Flag;
+volatile uint8_t u8Second, u8Minute, u8Hour, u8Day, u8Week, u8Month, u8Year;
 /******************************************************************************
  * Local pre-processor symbols/macros ('#define')
  ******************************************************************************/
@@ -57,10 +57,8 @@ int32_t main(void)
     /* 配置RTC */
     RtcConfig();
 
-    while (1)
-    {
-        if (u8Flag == 1)
-        {
+    while (1) {
+        if (u8Flag == 1) {
             u8Flag = 0;
             RTC_DateTimeRead(&stcReadTime);
             u8Second = stcReadTime.u8Second;
@@ -80,8 +78,7 @@ int32_t main(void)
  */
 void Rtc_IRQHandler(void)
 {
-    if (RTC_IntFlagGet(RTC_INT_PRD) == TRUE)
-    {
+    if (RTC_IntFlagGet(RTC_INT_PRD) == TRUE) {
         u8Flag = 1;
         RTC_IntFlagClear(RTC_INT_PRD); /* 清除中断标志位 */
     }
@@ -93,12 +90,13 @@ void Rtc_IRQHandler(void)
  */
 static void RtcConfig(void)
 {
-    SYSCTRL_PeriphClockEnable(PeriphClockRtc);           /* RTC模块时钟打开 */
-    SYSCTRL_ClockSrcEnable(SYSCTRL_CLK_SRC_XTL);         /* 打开XTL */
-    SYSCTRL_DebugActiveEnable(SYSCTRL_DEBUG_RTC_ACTIVE); /* debug时RTC正常计数 */
+    SYSCTRL_PeriphClockEnable(PeriphClockRtc);   /* RTC模块时钟打开 */
+    SYSCTRL_ClockSrcEnable(SYSCTRL_CLK_SRC_XTL); /* 打开XTL */
+    SYSCTRL_DebugActiveEnable(
+        SYSCTRL_DEBUG_RTC_ACTIVE); /* debug时RTC正常计数 */
 
-    stc_rtc_init_t stcRtcInit = {0};
-    stc_rtc_prd_t  stcPrdInit = {0};
+    stc_rtc_init_t stcRtcInit = { 0 };
+    stc_rtc_prd_t stcPrdInit  = { 0 };
 
     /* 结构体初始化 */
     RTC_RtcStcInit(&stcRtcInit);
@@ -114,9 +112,12 @@ static void RtcConfig(void)
     stcRtcInit.stcRtcTime.u8Month     = 0x08u;
     stcRtcInit.stcRtcTime.u8Year      = 0x22u;
 
-    stcPrdInit.u32PrdSelect = RTC_PRDSEL_PRDX; /* 选择设置产生时间间隔方式:PRDX/PRDS*/
-    stcPrdInit.u8Prdx       = 5u;              /* 0000101:3秒，周期中断时间间隔。选择PRDX时有效，选择PRDS时无效 */
-    // stcPrdInit.u32Prds      = RTC_PRDS_1SEC;   /* 设置产生中断的时间间隔。选择PRDS时有效，选择PRDX时无效 */
+    stcPrdInit.u32PrdSelect =
+        RTC_PRDSEL_PRDX; /* 选择设置产生时间间隔方式:PRDX/PRDS*/
+    stcPrdInit.u8Prdx =
+        5u; /* 0000101:3秒，周期中断时间间隔。选择PRDX时有效，选择PRDS时无效 */
+    // stcPrdInit.u32Prds      = RTC_PRDS_1SEC;   /*
+    // 设置产生中断的时间间隔。选择PRDS时有效，选择PRDX时无效 */
 
     RTC_Unlock(); /* RTC写保护解锁 */
 

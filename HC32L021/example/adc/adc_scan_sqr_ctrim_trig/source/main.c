@@ -23,10 +23,10 @@
 /*******************************************************************************
  * Include files
  ******************************************************************************/
-#include "adc.h"
-#include "ctrim.h"
-#include "ddl.h"
-#include "gpio.h"
+#include "hc32l021_adc.h"
+#include "hc32l021_ctrim.h"
+#include "hc32l021_ddl.h"
+#include "hc32l021_gpio.h"
 /*******************************************************************************
  * Local type definitions ('typedef')
  ******************************************************************************/
@@ -65,8 +65,7 @@ int32_t main(void)
     /* 使能CTRIM */
     CTRIM_Enable();
 
-    while (1)
-    {
+    while (1) {
         ;
     }
 }
@@ -78,8 +77,7 @@ int32_t main(void)
 void Adc_IRQHandler(void)
 {
     /* 等待转换完成 */
-    if (ADC_IntFlagGet(ADC_FLAG_SQR))
-    {
+    if (ADC_IntFlagGet(ADC_FLAG_SQR)) {
         /* 清除中断标志 */
         ADC_IntFlagClear(ADC_FLAG_SQR);
 
@@ -96,7 +94,7 @@ void Adc_IRQHandler(void)
  */
 static void AdcConfig(void)
 {
-    stc_adc_sqr_init_t stcAdcSqrConfig = {0};
+    stc_adc_sqr_init_t stcAdcSqrConfig = { 0 };
 
     SYSCTRL_PeriphClockEnable(PeriphClockAdc);
 
@@ -104,11 +102,12 @@ static void AdcConfig(void)
 
     /* ADC 初始化配置 */
     ADC_SqrStcInit(&stcAdcSqrConfig);
-    stcAdcSqrConfig.u32SampCycle     = ADC_SAMPLE_CYCLE_12;   /* ADC采样周期选择 */
-    stcAdcSqrConfig.u32RefVoltage    = ADC_REF_VOL_AVCC;      /* ADC参考电压选择 */
-    stcAdcSqrConfig.u32ClockDiv      = ADC_CLK_DIV8;          /* ADC时钟分频选择 */
-    stcAdcSqrConfig.u32CurrentSelect = ADC_IBAS_LOWEST_POWER; /* ADCIBAS电流选择 */
-    stcAdcSqrConfig.u32SqrCount      = 3;                     /* ADC转换次数配置 */
+    stcAdcSqrConfig.u32SampCycle = ADC_SAMPLE_CYCLE_12; /* ADC采样周期选择 */
+    stcAdcSqrConfig.u32RefVoltage = ADC_REF_VOL_AVCC; /* ADC参考电压选择 */
+    stcAdcSqrConfig.u32ClockDiv = ADC_CLK_DIV8; /* ADC时钟分频选择 */
+    stcAdcSqrConfig.u32CurrentSelect =
+        ADC_IBAS_LOWEST_POWER;       /* ADCIBAS电流选择 */
+    stcAdcSqrConfig.u32SqrCount = 3; /* ADC转换次数配置 */
 
     ADC_SqrInit(&stcAdcSqrConfig); /* 初始化配置 */
 
@@ -116,9 +115,12 @@ static void AdcConfig(void)
     GPIO_PA02_ANALOG_SET();
     GPIO_PA03_ANALOG_SET();
     GPIO_PA05_ANALOG_SET();
-    ADC_ConfigSqrCh(ADC_SQR_CH0_MUX, ADC_INPUT_CH1); /* 配置通道0的输入源来自PA02 */
-    ADC_ConfigSqrCh(ADC_SQR_CH1_MUX, ADC_INPUT_CH2); /* 配置通道1的输入源来自PA03 */
-    ADC_ConfigSqrCh(ADC_SQR_CH2_MUX, ADC_INPUT_CH3); /* 配置通道2的输入源来自PA05 */
+    ADC_ConfigSqrCh(
+        ADC_SQR_CH0_MUX, ADC_INPUT_CH1); /* 配置通道0的输入源来自PA02 */
+    ADC_ConfigSqrCh(
+        ADC_SQR_CH1_MUX, ADC_INPUT_CH2); /* 配置通道1的输入源来自PA03 */
+    ADC_ConfigSqrCh(
+        ADC_SQR_CH2_MUX, ADC_INPUT_CH3); /* 配置通道2的输入源来自PA05 */
 
     /* 配置外部触发源 */
     ADC_ExternTrigEnable(ADC_TRIG_CTRIM);
@@ -134,7 +136,7 @@ static void AdcConfig(void)
  */
 static void CtrimConfig(void)
 {
-    stc_ctrim_timer_init_t stcCtrimInit = {0};
+    stc_ctrim_timer_init_t stcCtrimInit = { 0 };
 
     /* 开启CTRIM 外设时钟 */
     SYSCTRL_PeriphClockEnable(PeriphClockCtrim);
@@ -143,10 +145,11 @@ static void CtrimConfig(void)
     SYSCTRL_PeriphReset(PeriphResetCtrim);
 
     /* CTRIM 初始化配置 */
-    CTRIM_TimerStcInit(&stcCtrimInit);                       /* 结构体变量初始化 */
-    stcCtrimInit.u32Clock       = CTRIM_ACCURATE_CLOCK_PCLK; /* 时钟源选择 */
-    stcCtrimInit.u32ClockDiv    = CTRIM_REF_CLOCK_DIV128;    /* 分频128 */
-    stcCtrimInit.u16ReloadValue = 31250u - 1u;               /* 定时约1s，4000000/128 = 31250 */
+    CTRIM_TimerStcInit(&stcCtrimInit); /* 结构体变量初始化 */
+    stcCtrimInit.u32Clock    = CTRIM_ACCURATE_CLOCK_PCLK; /* 时钟源选择 */
+    stcCtrimInit.u32ClockDiv = CTRIM_REF_CLOCK_DIV128;    /* 分频128 */
+    stcCtrimInit.u16ReloadValue =
+        31250u - 1u; /* 定时约1s，4000000/128 = 31250 */
     CTRIM_TimerInit(&stcCtrimInit);
 }
 

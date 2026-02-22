@@ -21,9 +21,9 @@
 /******************************************************************************
  * Include files
  ******************************************************************************/
-#include "btim.h"
-#include "ddl.h"
-#include "gpio.h"
+#include "hc32l021_btim.h"
+#include "hc32l021_ddl.h"
+#include "hc32l021_gpio.h"
 /******************************************************************************
  * Local pre-processor symbols/macros ('#define')
  ******************************************************************************/
@@ -58,8 +58,7 @@ int32_t main(void)
 
     /* ETR 输入一次下降沿，启动btim0运行一次，溢出后停止 */
 
-    while (1)
-    {
+    while (1) {
         ;
     }
 }
@@ -70,14 +69,16 @@ int32_t main(void)
  */
 void Ctim0_IRQHandler(void)
 {
-    if (TRUE == BTIM_IntFlagGet(BTIM0, BTIM_FLAG_TI)) /* 获取BTIM0的触发中断标志位 */
+    if (TRUE
+        == BTIM_IntFlagGet(BTIM0, BTIM_FLAG_TI)) /* 获取BTIM0的触发中断标志位 */
     {
         STK_LED_ON(); /* LED 开启 */
 
         BTIM_IntFlagClear(BTIM0, BTIM_FLAG_TI); /* 清除BTIM0的触发中断标志位 */
     }
 
-    if (TRUE == BTIM_IntFlagGet(BTIM0, BTIM_FLAG_UI)) /* 获取BTIM0的溢出中断标志位 */
+    if (TRUE
+        == BTIM_IntFlagGet(BTIM0, BTIM_FLAG_UI)) /* 获取BTIM0的溢出中断标志位 */
     {
         STK_LED_OFF(); /* LED 关闭 */
 
@@ -91,7 +92,7 @@ void Ctim0_IRQHandler(void)
  */
 static void GpioConfig(void)
 {
-    stc_gpio_init_t stcGpioInit = {0};
+    stc_gpio_init_t stcGpioInit = { 0 };
 
     SYSCTRL_PeriphClockEnable(PeriphClockGpio); /*开启GPIO时钟*/
 
@@ -109,24 +110,32 @@ static void GpioConfig(void)
  */
 static void Btim0Config(void)
 {
-    stc_btim_init_t stcBtimInit = {0};
+    stc_btim_init_t stcBtimInit = { 0 };
 
-    SYSCTRL_FuncEnable(SYSCTRL_FUNC_CTIMER0_USE_BTIM); /* 配置BTIM0/1/2有效，GTIM0无效*/
-    SYSCTRL_PeriphClockEnable(PeriphClockCtim0);       /* 使能BTIM0/1/2 外设时钟 */
+    SYSCTRL_FuncEnable(
+        SYSCTRL_FUNC_CTIMER0_USE_BTIM); /* 配置BTIM0/1/2有效，GTIM0无效*/
+    SYSCTRL_PeriphClockEnable(PeriphClockCtim0); /* 使能BTIM0/1/2 外设时钟 */
 
-    BTIM_StcInit(&stcBtimInit);                                      /* 结构体变量初始值初始化 */
-    stcBtimInit.u32Mode                = BTIM_MD_TRIG;               /* 工作模式: 触发模式 */
-    stcBtimInit.u32OneShotEn           = BTIM_ONESHOT_COUNTER;       /* 单次计数模式 */
-    stcBtimInit.u32Prescaler           = BTIM_COUNTER_CLK_DIV512;    /* 对计数时钟进行预除频 */
-    stcBtimInit.u32ToggleEn            = BTIM_TOGGLE_DISABLE;        /* TOG输出禁止 */
-    stcBtimInit.u32TriggerSrc          = BTIM_TRIG_SRC_ETR;          /* 触发源选择，使用外部ETR输入作为触发信号 */
-    stcBtimInit.u32ExternInputPolarity = BTIM_ETR_POLARITY_INVERTED; /* 外部输入极性选择，极性不翻转 */
-    stcBtimInit.u32AutoReloadValue     = 10000 - 1;                  /* 自动重载寄存ARR赋值,计数周期为PRS*(ARR+1)*TPCLK */
-    BTIM_Init(BTIM0, &stcBtimInit);                                  /* BITM0初始化 */
+    BTIM_StcInit(&stcBtimInit); /* 结构体变量初始值初始化 */
+    stcBtimInit.u32Mode      = BTIM_MD_TRIG; /* 工作模式: 触发模式 */
+    stcBtimInit.u32OneShotEn = BTIM_ONESHOT_COUNTER; /* 单次计数模式 */
+    stcBtimInit.u32Prescaler =
+        BTIM_COUNTER_CLK_DIV512; /* 对计数时钟进行预除频 */
+    stcBtimInit.u32ToggleEn = BTIM_TOGGLE_DISABLE; /* TOG输出禁止 */
+    stcBtimInit.u32TriggerSrc =
+        BTIM_TRIG_SRC_ETR; /* 触发源选择，使用外部ETR输入作为触发信号 */
+    stcBtimInit.u32ExternInputPolarity =
+        BTIM_ETR_POLARITY_INVERTED; /* 外部输入极性选择，极性不翻转 */
+    stcBtimInit.u32AutoReloadValue =
+        10000 - 1; /* 自动重载寄存ARR赋值,计数周期为PRS*(ARR+1)*TPCLK */
+    BTIM_Init(BTIM0, &stcBtimInit); /* BITM0初始化 */
 
-    BTIM_IntFlagClear(BTIM0, BTIM_FLAG_UI | BTIM_FLAG_TI); /* 清除溢出中断标志位、触发中断标志位 */
-    BTIM_IntEnable(BTIM0, BTIM_INT_UI | BTIM_INT_TI);      /* 允许BTIM0溢出中断、触发中断 */
-    EnableNvic(CTIM0_IRQn, IrqPriorityLevel3, TRUE);       /* 开启中断 */
+    BTIM_IntFlagClear(
+        BTIM0,
+        BTIM_FLAG_UI | BTIM_FLAG_TI); /* 清除溢出中断标志位、触发中断标志位 */
+    BTIM_IntEnable(
+        BTIM0, BTIM_INT_UI | BTIM_INT_TI); /* 允许BTIM0溢出中断、触发中断 */
+    EnableNvic(CTIM0_IRQn, IrqPriorityLevel3, TRUE); /* 开启中断 */
 }
 
 /******************************************************************************

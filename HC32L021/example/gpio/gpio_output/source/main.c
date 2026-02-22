@@ -21,7 +21,7 @@
 /******************************************************************************
  * Include files
  ******************************************************************************/
-#include "gpio.h"
+#include "hc32l021_gpio.h"
 /*******************************************************************************
  * Local type definitions ('typedef')
  ******************************************************************************/
@@ -49,8 +49,7 @@ int32_t main(void)
 {
     GpioConfig(); /* LED端口初始化 */
 
-    while (1)
-    {
+    while (1) {
         GPIO_PA00_SET();
         DDL_Delay1ms(1000);
         GPIO_PA00_RESET();
@@ -64,13 +63,13 @@ int32_t main(void)
  */
 static void GpioConfig(void)
 {
-    stc_gpio_init_t stcGpioInit = {0};
+    stc_gpio_init_t stcGpioInit = { 0 };
 
     SYSCTRL_PeriphClockEnable(PeriphClockGpio); /*开启GPIO时钟*/
 
     /* LED端口初始化 */
-    GPIO_StcInit(&stcGpioInit);                   /* 结构体变量初始值初始化 */
-    stcGpioInit.bOutputValue = TRUE;              /* 设置GPIO输出初始值为高 */
+    GPIO_StcInit(&stcGpioInit);      /* 结构体变量初始值初始化 */
+    stcGpioInit.bOutputValue = TRUE; /* 设置GPIO输出初始值为高 */
     stcGpioInit.u32Mode      = GPIO_MD_OUTPUT_PP; /* 端口方向配置 */
     stcGpioInit.u32PullUp    = GPIO_PULL_NONE;    /* 端口上拉配置 */
     stcGpioInit.u32Pin       = GPIO_PIN_00;       /* 端口引脚配置 */

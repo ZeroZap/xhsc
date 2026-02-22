@@ -21,9 +21,9 @@
 /******************************************************************************
  * Include files
  ******************************************************************************/
-#include "btim.h"
-#include "ddl.h"
-#include "gpio.h"
+#include "hc32l021_btim.h"
+#include "hc32l021_ddl.h"
+#include "hc32l021_gpio.h"
 /******************************************************************************
  * Local pre-processor symbols/macros ('#define')
  ******************************************************************************/
@@ -55,8 +55,7 @@ int32_t main(void)
 
     BTIM_Enable(BTIM0); /* 启动BTIM0运行 */
 
-    while (1)
-    {
+    while (1) {
         ;
     }
 }
@@ -69,16 +68,12 @@ void Ctim0_IRQHandler(void)
 {
     static boolean_t bFlag = FALSE;
 
-    if (TRUE == BTIM_IntFlagGet(BTIM0, BTIM_FLAG_UI))
-    {
-        if (FALSE == bFlag)
-        {
+    if (TRUE == BTIM_IntFlagGet(BTIM0, BTIM_FLAG_UI)) {
+        if (FALSE == bFlag) {
             STK_LED_ON(); /* LED 引脚输出高电平 */
 
             bFlag = TRUE;
-        }
-        else
-        {
+        } else {
             STK_LED_OFF(); /* LED 引脚输出低电平 */
 
             bFlag = FALSE;
@@ -94,22 +89,26 @@ void Ctim0_IRQHandler(void)
  */
 static void Btim0Config(uint16_t u16Period)
 {
-    stc_btim_init_t stcBtimInit = {0};
+    stc_btim_init_t stcBtimInit = { 0 };
 
     /* 配置BTIM0/1/2有效，GTIM0无效 */
-    SYSCTRL_FuncEnable(SYSCTRL_FUNC_CTIMER0_USE_BTIM); /* 配置BTIM0/1/2有效，GTIM0无效 */
-    SYSCTRL_PeriphClockEnable(PeriphClockCtim0);       /* CTIM0 时钟使能 */
+    SYSCTRL_FuncEnable(
+        SYSCTRL_FUNC_CTIMER0_USE_BTIM); /* 配置BTIM0/1/2有效，GTIM0无效 */
+    SYSCTRL_PeriphClockEnable(PeriphClockCtim0); /* CTIM0 时钟使能 */
 
-    BTIM_StcInit(&stcBtimInit);                               /* 结构体变量初始值初始化 */
-    stcBtimInit.u32Mode            = BTIM_MD_PCLK;            /* 工作模式:定时器模式，计数时钟源来自PCLK */
-    stcBtimInit.u32OneShotEn       = BTIM_CONTINUOUS_COUNTER; /* 连续计数模式 */
-    stcBtimInit.u32Prescaler       = BTIM_COUNTER_CLK_DIV256; /* 对计数时钟进行预除频 */
-    stcBtimInit.u32ToggleEn        = BTIM_TOGGLE_DISABLE;     /* TOG输出不使能 */
-    stcBtimInit.u32AutoReloadValue = u16Period - 1;           /* 自动重载寄存ARR赋值,计数周期为PRS*(ARR+1)*TPCLK */
+    BTIM_StcInit(&stcBtimInit); /* 结构体变量初始值初始化 */
+    stcBtimInit.u32Mode =
+        BTIM_MD_PCLK; /* 工作模式:定时器模式，计数时钟源来自PCLK */
+    stcBtimInit.u32OneShotEn = BTIM_CONTINUOUS_COUNTER; /* 连续计数模式 */
+    stcBtimInit.u32Prescaler =
+        BTIM_COUNTER_CLK_DIV256; /* 对计数时钟进行预除频 */
+    stcBtimInit.u32ToggleEn = BTIM_TOGGLE_DISABLE; /* TOG输出不使能 */
+    stcBtimInit.u32AutoReloadValue =
+        u16Period - 1; /* 自动重载寄存ARR赋值,计数周期为PRS*(ARR+1)*TPCLK */
     BTIM_Init(BTIM0, &stcBtimInit);
 
-    BTIM_IntFlagClear(BTIM0, BTIM_FLAG_UI);          /* 清除溢出中断标志位 */
-    BTIM_IntEnable(BTIM0, BTIM_INT_UI);              /* 允许BTIM0溢出中断    */
+    BTIM_IntFlagClear(BTIM0, BTIM_FLAG_UI); /* 清除溢出中断标志位 */
+    BTIM_IntEnable(BTIM0, BTIM_INT_UI);     /* 允许BTIM0溢出中断    */
     EnableNvic(CTIM0_IRQn, IrqPriorityLevel3, TRUE); /* NVIC使能 */
 }
 

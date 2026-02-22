@@ -21,9 +21,9 @@
 /*******************************************************************************
  * Include files
  ******************************************************************************/
-#include "flash.h"
-#include "gpio.h"
-#include "sysctrl.h"
+#include "hc32l021_flash.h"
+#include "hc32l021_gpio.h"
+#include "hc32l021_sysctrl.h"
 /*******************************************************************************
  * Local type definitions ('typedef')
  ******************************************************************************/
@@ -58,8 +58,7 @@ int32_t main(void)
     /* 内核函数，SysTick配置，定时1s，系统时钟默认RC48M 4MHz */
     SysTick_Config(SystemCoreClock);
 
-    while (1)
-    {
+    while (1) {
         ;
     }
 }
@@ -70,14 +69,15 @@ int32_t main(void)
  */
 static void SysClockConfig(void)
 {
-    stc_sysctrl_clock_init_t stcSysClockInit = {0};
+    stc_sysctrl_clock_init_t stcSysClockInit = { 0 };
 
     /* 结构体初始化 */
     SYSCTRL_ClockStcInit(&stcSysClockInit);
 
-    stcSysClockInit.u32SysClockSrc = SYSCTRL_CLK_SRC_RC48M_4M; /* 选择系统默认RC48M 4MHz作为Hclk时钟源 */
-    stcSysClockInit.u32HclkDiv     = SYSCTRL_HCLK_PRS_DIV8;    /* Hclk 8分频 */
-    SYSCTRL_ClockInit(&stcSysClockInit);                       /* 系统时钟初始化 */
+    stcSysClockInit.u32SysClockSrc =
+        SYSCTRL_CLK_SRC_RC48M_4M; /* 选择系统默认RC48M 4MHz作为Hclk时钟源 */
+    stcSysClockInit.u32HclkDiv = SYSCTRL_HCLK_PRS_DIV8; /* Hclk 8分频 */
+    SYSCTRL_ClockInit(&stcSysClockInit); /* 系统时钟初始化 */
 }
 
 /**
@@ -89,8 +89,7 @@ void SysTick_IRQHandler(void)
     if (STK_LED_READ()) /* LED is on */
     {
         STK_LED_OFF();
-    }
-    else /* LED is off */
+    } else /* LED is off */
     {
         STK_LED_ON();
     }

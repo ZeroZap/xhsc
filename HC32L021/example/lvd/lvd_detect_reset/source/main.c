@@ -21,8 +21,8 @@
 /******************************************************************************
  * Include files
  ******************************************************************************/
-#include "gpio.h"
-#include "lvd.h"
+#include "hc32l021_gpio.h"
+#include "hc32l021_lvd.h"
 /*******************************************************************************
  * Local type definitions ('typedef')
  ******************************************************************************/
@@ -50,8 +50,7 @@ static void LvdConfig(void);
 int32_t main(void)
 {
     /* 首次上电FLAG清零 */
-    if (TRUE == SYSCTRL_ResetFlagGet(SYSCTRL_RST_POR5V))
-    {
+    if (TRUE == SYSCTRL_ResetFlagGet(SYSCTRL_RST_POR5V)) {
         SYSCTRL_ResetFlagClearAll();
     }
 
@@ -60,8 +59,7 @@ int32_t main(void)
     STK_LedConfig(); /* LED配置 */
 
     /* 低电压复位检测 */
-    if (TRUE == SYSCTRL_ResetFlagGet(SYSCTRL_RST_LVD))
-    {
+    if (TRUE == SYSCTRL_ResetFlagGet(SYSCTRL_RST_LVD)) {
         LVD_IntFlagClear();
 
         SYSCTRL_ResetFlagClear(SYSCTRL_RST_LVD);
@@ -75,8 +73,7 @@ int32_t main(void)
     /* LVD 配置 */
     LvdConfig();
 
-    while (1)
-    {
+    while (1) {
         ;
     }
 }
@@ -87,7 +84,7 @@ int32_t main(void)
  */
 static void GpioConfig(void)
 {
-    stc_gpio_init_t stcGpioInit = {0};
+    stc_gpio_init_t stcGpioInit = { 0 };
 
     /* 开启GPIO外设时钟 */
     SYSCTRL_PeriphClockEnable(PeriphClockGpio);
@@ -112,18 +109,18 @@ static void GpioConfig(void)
  */
 static void LvdConfig(void)
 {
-    stc_lvd_init_t stcLvdInit = {0};
+    stc_lvd_init_t stcLvdInit = { 0 };
 
     LVD_StcInit(&stcLvdInit); /* 结构体初始化 */
 
     SYSCTRL_PeriphClockEnable(PeriphClockVc); /* 开LVD时钟 */
 
-    stcLvdInit.u32TriggerAction = LVD_TRIG_ACT_RESET;     /* 配置触发产生复位 */
-    stcLvdInit.u32TriggerMode   = LVD_TRIG_MD_HIGH;       /* 中断触发类型 */
-    stcLvdInit.u32Src           = LVD_SRC_PA03;           /* 配置LVD输入源 */
+    stcLvdInit.u32TriggerAction = LVD_TRIG_ACT_RESET; /* 配置触发产生复位 */
+    stcLvdInit.u32TriggerMode = LVD_TRIG_MD_HIGH;     /* 中断触发类型 */
+    stcLvdInit.u32Src         = LVD_SRC_PA03;         /* 配置LVD输入源 */
     stcLvdInit.u32ThresholdVolt = LVD_THRESHOLD_VOLT1P8V; /* 配置LVD基准电压 */
-    stcLvdInit.u32FilterTime    = LVD_FILTER_TIME_2CYCLE; /* 滤波时间设置 */
-    stcLvdInit.u32FilterMode    = LVD_FILTER_MD_NFM;      /* 滤波模式 */
+    stcLvdInit.u32FilterTime = LVD_FILTER_TIME_2CYCLE; /* 滤波时间设置 */
+    stcLvdInit.u32FilterMode = LVD_FILTER_MD_NFM;      /* 滤波模式 */
     LVD_Init(&stcLvdInit);
 
     /* LVD 模块使能 */

@@ -21,9 +21,9 @@
 /*******************************************************************************
  * Include files
  ******************************************************************************/
-#include "flash.h"
-#include "gpio.h"
-#include "sysctrl.h"
+#include "hc32l021_flash.h"
+#include "hc32l021_gpio.h"
+#include "hc32l021_sysctrl.h"
 /*******************************************************************************
  * Local type definitions ('typedef')
  ******************************************************************************/
@@ -59,7 +59,8 @@ int32_t main(void)
     /* =============================================== */
     /* ==============       WARNING       ============ */
     /* =============================================== */
-    /* 因本样例使用PA14（SWCLK）输出时钟，为了避免程序再次下载出现问题，请勿删除延时DDL_Delay1ms函数调用 */
+    /* 因本样例使用PA14（SWCLK）输出时钟，为了避免程序再次下载出现问题，请勿删除延时DDL_Delay1ms函数调用
+     */
     DDL_Delay1ms(2000u);
 
     while (!STK_USER_KEY_PRESSED()) /* 等待按键按下 */
@@ -70,8 +71,7 @@ int32_t main(void)
     /* 配置Hclk分频时钟信号从IO口输出 */
     GpioConfig();
 
-    while (1)
-    {
+    while (1) {
         ;
     }
 }
@@ -82,14 +82,15 @@ int32_t main(void)
  */
 static void SysClockConfig(void)
 {
-    stc_sysctrl_clock_init_t stcSysClockInit = {0};
+    stc_sysctrl_clock_init_t stcSysClockInit = { 0 };
 
     /* 结构体初始化 */
     SYSCTRL_ClockStcInit(&stcSysClockInit);
 
-    stcSysClockInit.u32SysClockSrc = SYSCTRL_CLK_SRC_RC48M_48M; /* 选择系统默认RC48M 48MHz作为Hclk时钟源 */
-    stcSysClockInit.u32HclkDiv     = SYSCTRL_HCLK_PRS_DIV1;     /* Hclk 1分频 */
-    SYSCTRL_ClockInit(&stcSysClockInit);                        /* 系统时钟初始化 */
+    stcSysClockInit.u32SysClockSrc =
+        SYSCTRL_CLK_SRC_RC48M_48M; /* 选择系统默认RC48M 48MHz作为Hclk时钟源 */
+    stcSysClockInit.u32HclkDiv = SYSCTRL_HCLK_PRS_DIV1; /* Hclk 1分频 */
+    SYSCTRL_ClockInit(&stcSysClockInit); /* 系统时钟初始化 */
 }
 
 /**
@@ -98,7 +99,7 @@ static void SysClockConfig(void)
  */
 static void GpioConfig(void)
 {
-    stc_gpio_init_t stcGpioInit = {0};
+    stc_gpio_init_t stcGpioInit = { 0 };
 
     /* 结构体初始化 */
     GPIO_StcInit(&stcGpioInit);

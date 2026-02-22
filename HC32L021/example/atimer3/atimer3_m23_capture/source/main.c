@@ -21,10 +21,10 @@
 /*******************************************************************************
  * Include files
  ******************************************************************************/
-#include "atim3.h"
-#include "ddl.h"
-#include "flash.h"
-#include "gpio.h"
+#include "hc32l021_atim3.h"
+#include "hc32l021_ddl.h"
+#include "hc32l021_flash.h"
+#include "hc32l021_gpio.h"
 /*******************************************************************************
  * Local type definitions ('typedef')
  ******************************************************************************/
@@ -60,8 +60,7 @@ int32_t main(void)
 
     ATIM3_Mode23_Run(); /* 运行 */
 
-    while (1)
-    {
+    while (1) {
         ;
     }
 }
@@ -72,29 +71,28 @@ int32_t main(void)
  */
 void Atim3_IRQHandler(void)
 {
-    if (ATIM3_IntFlagGet(ATIM3_FLAG_UI))
-    {
+    if (ATIM3_IntFlagGet(ATIM3_FLAG_UI)) {
         u32Atim3UevCnt++;
         ATIM3_IntFlagClear(ATIM3_FLAG_UI);
     }
 
     static boolean_t bFlag = FALSE;
-    static uint32_t  u32Temp;
+    static uint32_t u32Temp;
 
-    if (ATIM3_IntFlagGet(ATIM3_FLAG_PWC_CA0))
-    {
-        if (FALSE == bFlag)
-        {
-            u32Atim3CaptureValue1 = ATIM3_Mode23_ChannelCaptureValueGet(ATIM3_COMPARE_CAPTURE_CH0A); /* 第一次读取捕获值 */
-            u32Atim3UevCnt        = 0;
-            bFlag                 = TRUE;
-        }
-        else
-        {
-            u32Temp              = ATIM3_Mode23_ChannelCaptureValueGet(ATIM3_COMPARE_CAPTURE_CH0A) - u32Atim3CaptureValue1;
-            u32Atim3CaptureValue = u32Temp + u32Atim3UevCnt * 0xFFFF; /* 两次捕获之间的差值 */
-            u32Atim3UevCnt       = 0;
-            bFlag                = FALSE;
+    if (ATIM3_IntFlagGet(ATIM3_FLAG_PWC_CA0)) {
+        if (FALSE == bFlag) {
+            u32Atim3CaptureValue1 = ATIM3_Mode23_ChannelCaptureValueGet(
+                ATIM3_COMPARE_CAPTURE_CH0A); /* 第一次读取捕获值 */
+            u32Atim3UevCnt = 0;
+            bFlag          = TRUE;
+        } else {
+            u32Temp =
+                ATIM3_Mode23_ChannelCaptureValueGet(ATIM3_COMPARE_CAPTURE_CH0A)
+                - u32Atim3CaptureValue1;
+            u32Atim3CaptureValue =
+                u32Temp + u32Atim3UevCnt * 0xFFFF; /* 两次捕获之间的差值 */
+            u32Atim3UevCnt = 0;
+            bFlag          = FALSE;
         }
 
         ATIM3_IntFlagClear(ATIM3_FLAG_PWC_CA0); /* 清中断标志 */
@@ -107,7 +105,7 @@ void Atim3_IRQHandler(void)
  */
 static void GpiotConfig(void)
 {
-    stc_gpio_init_t stcGpioInit = {0};
+    stc_gpio_init_t stcGpioInit = { 0 };
 
     SYSCTRL_PeriphClockEnable(PeriphClockGpio); /* GPIOA外设时钟使能 */
 
@@ -126,27 +124,37 @@ static void GpiotConfig(void)
  */
 static void Atimer3Config(void)
 {
-    uint16_t                   u16ArrValue;
-    uint16_t                   u16CntValue;
-    stc_atim3_mode23_init_t    stcAtim3BaseCfg    = {0};
-    stc_atim3_m23_input_init_t stcAtim3ChxaCapCfg = {0};
+    uint16_t u16ArrValue;
+    uint16_t u16CntValue;
+    stc_atim3_mode23_init_t stcAtim3BaseCfg       = { 0 };
+    stc_atim3_m23_input_init_t stcAtim3ChxaCapCfg = { 0 };
 
     SYSCTRL_PeriphClockEnable(PeriphClockAtim3); /* ATIM3 外设时钟使能 */
 
-    ATIM3_Mode23_StcInit(&stcAtim3BaseCfg);                                   /* 结构体初始化清零 */
-    stcAtim3BaseCfg.u32WorkMode         = ATIM3_M23_M23CR_WORK_MODE_SAWTOOTH; /* 锯齿波模式 */
-    stcAtim3BaseCfg.u32CountClockSelect = ATIM3_M23_M23CR_CT_PCLK;            /* 定时器功能，计数时钟为内部PCLK */
-    stcAtim3BaseCfg.u32PRS              = ATIM3_M23_M23CR_ATIM3CLK_PRS64;     /* PCLK/64 */
-    stcAtim3BaseCfg.u32CountDir         = ATIM3_M23_M23CR_DIR_UP_CNT;         /* 向上计数，在三角波模式时只读 */
-    ATIM3_Mode23_Init(&stcAtim3BaseCfg);                                      /* ATIM3 的模式23功能初始化 */
+    ATIM3_Mode23_StcInit(&stcAtim3BaseCfg); /* 结构体初始化清零 */
+    stcAtim3BaseCfg.u32WorkMode =
+        ATIM3_M23_M23CR_WORK_MODE_SAWTOOTH; /* 锯齿波模式 */
+    stcAtim3BaseCfg.u32CountClockSelect =
+        ATIM3_M23_M23CR_CT_PCLK; /* 定时器功能，计数时钟为内部PCLK */
+    stcAtim3BaseCfg.u32PRS = ATIM3_M23_M23CR_ATIM3CLK_PRS64; /* PCLK/64 */
+    stcAtim3BaseCfg.u32CountDir =
+        ATIM3_M23_M23CR_DIR_UP_CNT; /* 向上计数，在三角波模式时只读 */
+    ATIM3_Mode23_Init(&stcAtim3BaseCfg); /* ATIM3 的模式23功能初始化 */
 
-    ATIM3_Mode23_InputStcInit(&stcAtim3ChxaCapCfg);                                         /* 结构体初始化清零 */
-    stcAtim3ChxaCapCfg.u32CHxCompareCap    = ATIM3_M23_CRCHx_CSA_CSB_CAPTURE;               /* CH0A通道设置为捕获模式 */
-    stcAtim3ChxaCapCfg.u32CHxCaptureSelect = ATIM3_M23_CRCHx_CRxCFx_CAPTURE_EDGE_RISE_FALL; /* CH0A通道上升沿下降沿捕获都使能 */
-    stcAtim3ChxaCapCfg.u32CHxInFlt         = ATIM3_M23_FLTR_FLTxx_THREE_PCLK_DIV4_4;        /* PCLK/4 4个连续有效 */
-    stcAtim3ChxaCapCfg.u32CHxPolarity      = ATIM3_M23_FLTR_CCPxx_NORMAL_IN_OUT;            /* 正常输入输出 */
+    ATIM3_Mode23_InputStcInit(&stcAtim3ChxaCapCfg); /* 结构体初始化清零 */
+    stcAtim3ChxaCapCfg.u32CHxCompareCap =
+        ATIM3_M23_CRCHx_CSA_CSB_CAPTURE; /* CH0A通道设置为捕获模式 */
+    stcAtim3ChxaCapCfg.u32CHxCaptureSelect =
+        ATIM3_M23_CRCHx_CRxCFx_CAPTURE_EDGE_RISE_FALL; /* CH0A通道上升沿下降沿捕获都使能
+                                                        */
+    stcAtim3ChxaCapCfg.u32CHxInFlt =
+        ATIM3_M23_FLTR_FLTxx_THREE_PCLK_DIV4_4; /* PCLK/4 4个连续有效 */
+    stcAtim3ChxaCapCfg.u32CHxPolarity =
+        ATIM3_M23_FLTR_CCPxx_NORMAL_IN_OUT; /* 正常输入输出 */
 
-    ATIM3_Mode23_PortInputCHxAConfig(ATIM3_M23_OUTPUT_CHANNEL_CH0, &stcAtim3ChxaCapCfg); /* 端口输入初始化配置 */
+    ATIM3_Mode23_PortInputCHxAConfig(
+        ATIM3_M23_OUTPUT_CHANNEL_CH0,
+        &stcAtim3ChxaCapCfg); /* 端口输入初始化配置 */
 
     u16ArrValue = 0xFFFF;
     ATIM3_Mode23_ARRSet(u16ArrValue); /* 设置重载值,并使能缓存 */

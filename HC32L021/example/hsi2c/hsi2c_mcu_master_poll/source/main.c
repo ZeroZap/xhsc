@@ -21,10 +21,10 @@
 /*******************************************************************************
  * Include files
  ******************************************************************************/
-#include "flash.h"
-#include "gpio.h"
-#include "hsi2c.h"
-#include "sysctrl.h"
+#include "hc32l021_flash.h"
+#include "hc32l021_gpio.h"
+#include "hc32l021_hsi2c.h"
+#include "hc32l021_sysctrl.h"
 /*******************************************************************************
  * Local type definitions ('typedef')
  ******************************************************************************/
@@ -55,8 +55,8 @@ static void Hsi2cMasterWriteConfig(void);
 /*******************************************************************************
  * Local variable definitions ('static')
  ******************************************************************************/
-static uint8_t u8WriteData[TRANS_SIZE] = {0};
-static uint8_t u8ReadData[TRANS_SIZE]  = {0};
+static uint8_t u8WriteData[TRANS_SIZE] = { 0 };
+static uint8_t u8ReadData[TRANS_SIZE]  = { 0 };
 /*******************************************************************************
  * Function implementation - global ('extern') and local ('static')
  ******************************************************************************/
@@ -75,8 +75,7 @@ int32_t main(void)
     STK_LedConfig();
 
     /* 测试数据初始化 */
-    for (u32Index = 0; u32Index < TRANS_SIZE; u32Index++)
-    {
+    for (u32Index = 0; u32Index < TRANS_SIZE; u32Index++) {
         u8WriteData[u32Index] = u32Index + 0x10u;
         u8ReadData[u32Index]  = u32Index + 0x20u;
     }
@@ -88,10 +87,10 @@ int32_t main(void)
     Hsi2cMasterWriteConfig();
 
     /* 主机轮询传输 */
-    HSI2C_MasterTransferPoll(HSI2C, u8WriteData, sizeof(u8WriteData), TRANS_TIMEOUT);
+    HSI2C_MasterTransferPoll(
+        HSI2C, u8WriteData, sizeof(u8WriteData), TRANS_TIMEOUT);
 
-    while (stcHsi2cCom.enComStatus == Hsi2cComBusy)
-    {
+    while (stcHsi2cCom.enComStatus == Hsi2cComBusy) {
         ;
     }
 
@@ -102,17 +101,16 @@ int32_t main(void)
     Hsi2cMasterReadConfig();
 
     /* 主机轮询传输 */
-    HSI2C_MasterTransferPoll(HSI2C, u8ReadData, sizeof(u8ReadData), TRANS_TIMEOUT);
+    HSI2C_MasterTransferPoll(
+        HSI2C, u8ReadData, sizeof(u8ReadData), TRANS_TIMEOUT);
 
-    while (stcHsi2cCom.enComStatus == Hsi2cComBusy)
-    {
+    while (stcHsi2cCom.enComStatus == Hsi2cComBusy) {
         ;
     }
 
     STK_LED_ON();
 
-    while (1)
-    {
+    while (1) {
         ;
     }
 }
@@ -124,9 +122,10 @@ int32_t main(void)
  *         HSI2C_ADDR_MD = HSI2C_ADDR_MD_7BIT, u8SubAddrSize = 0：
  *             Start + 7-bit Slave Address(W) + u8WriteData[TRANS_SIZE] + Stop
  *         HSI2C_ADDR_MD = HSI2C_ADDR_MD_7BIT, u8SubAddrSize = 2：
- *             Start + 7-bit Slave Address(W) + Sub Address(2bytes) + u8WriteData[TRANS_SIZE] + Stop
- *         HSI2C_ADDR_MD = HSI2C_ADDR_MD_10BIT, u8SubAddrSize = 1：
- *             Start + 1st 7bits of Slave Address(W) + 2nd 8bits of Slave Address + u8WriteData[TRANS_SIZE] + Stop
+ *             Start + 7-bit Slave Address(W) + Sub Address(2bytes) +
+ * u8WriteData[TRANS_SIZE] + Stop HSI2C_ADDR_MD = HSI2C_ADDR_MD_10BIT,
+ * u8SubAddrSize = 1： Start + 1st 7bits of Slave Address(W) + 2nd 8bits of
+ * Slave Address + u8WriteData[TRANS_SIZE] + Stop
  */
 static void Hsi2cMasterWriteConfig(void)
 {
@@ -144,19 +143,21 @@ static void Hsi2cMasterWriteConfig(void)
     stcHsi2cMasterInit.u32SubAddr    = 0x1020u;     /* Sub address */
     stcHsi2cMasterInit.u8SubAddrSize = 2;           /* Sub address size */
 #else
-    stcHsi2cMasterInit.u8SlaveAddr   = HSI2C_10BitAddrMdHighBitsGet(DEVICE_ADDR); /* 10-bit从机1st 7bits(1 1 1 1 0 A9 A8)地址 */
-    stcHsi2cMasterInit.u32SubAddr    = HSI2C_10BitAddrMdLowBitsGet(DEVICE_ADDR);  /* 10-bit从机2nd 8bits(A7~A0)地址 */
-    stcHsi2cMasterInit.u8SubAddrSize = 1;                                         /* 10-bit从机地址时：长度设置为1 */
+    stcHsi2cMasterInit.u8SlaveAddr = HSI2C_10BitAddrMdHighBitsGet(
+        DEVICE_ADDR); /* 10-bit从机1st 7bits(1 1 1 1 0 A9 A8)地址 */
+    stcHsi2cMasterInit.u32SubAddr = HSI2C_10BitAddrMdLowBitsGet(
+        DEVICE_ADDR); /* 10-bit从机2nd 8bits(A7~A0)地址 */
+    stcHsi2cMasterInit.u8SubAddrSize = 1; /* 10-bit从机地址时：长度设置为1 */
 #endif
     stcHsi2cMasterInit.enDir = Hsi2cMasterWriteSlaveRead;
 
-    stcHsi2cMasterInit.stcMasterConfig2.u32SdaFilterEnable = HSI2C_MASTER_FILTBPSDA_ENABLE;
-    stcHsi2cMasterInit.stcMasterConfig2.u32SclFilterEnable = HSI2C_MASTER_FILTBPSCL_ENABLE;
+    stcHsi2cMasterInit.stcMasterConfig2.u32SdaFilterEnable =
+        HSI2C_MASTER_FILTBPSDA_ENABLE;
+    stcHsi2cMasterInit.stcMasterConfig2.u32SclFilterEnable =
+        HSI2C_MASTER_FILTBPSCL_ENABLE;
 
-    if (Ok != HSI2C_MasterInit(HSI2C, &stcHsi2cMasterInit, SystemCoreClock))
-    {
-        while (1)
-        {
+    if (Ok != HSI2C_MasterInit(HSI2C, &stcHsi2cMasterInit, SystemCoreClock)) {
+        while (1) {
             ;
         }
     }
@@ -169,9 +170,11 @@ static void Hsi2cMasterWriteConfig(void)
  *         HSI2C_ADDR_MD = HSI2C_ADDR_MD_7BIT, u8SubAddrSize = 0：
  *             Start + 7-bit Slave Address(R) + u8ReadData[TRANS_SIZE] + Stop
  *         HSI2C_ADDR_MD = HSI2C_ADDR_MD_7BIT, u8SubAddrSize = 2：
- *             Start + 7-bit Slave Address(W) + Sub Address(2bytes) + Restart + 7-bit Slave Address(R) + u8ReadData[TRANS_SIZE] + Stop
- *         HSI2C_ADDR_MD = HSI2C_ADDR_MD_10BIT, u8SubAddrSize = 1：
- *             Start + 1st 7bits of Slave Address(W) + 2nd 8bits of Slave Address + Restart + 1st 7bits of Slave Address(R) + u8ReadData[TRANS_SIZE] + Stop
+ *             Start + 7-bit Slave Address(W) + Sub Address(2bytes) + Restart +
+ * 7-bit Slave Address(R) + u8ReadData[TRANS_SIZE] + Stop HSI2C_ADDR_MD =
+ * HSI2C_ADDR_MD_10BIT, u8SubAddrSize = 1： Start + 1st 7bits of Slave
+ * Address(W) + 2nd 8bits of Slave Address + Restart + 1st 7bits of Slave
+ * Address(R) + u8ReadData[TRANS_SIZE] + Stop
  */
 static void Hsi2cMasterReadConfig(void)
 {
@@ -189,19 +192,21 @@ static void Hsi2cMasterReadConfig(void)
     stcHsi2cMasterInit.u32SubAddr    = 0x1020u;     /* Sub address */
     stcHsi2cMasterInit.u8SubAddrSize = 2;           /* Sub address size */
 #else
-    stcHsi2cMasterInit.u8SlaveAddr   = HSI2C_10BitAddrMdHighBitsGet(DEVICE_ADDR); /* 10-bit从机1st 7bits(1 1 1 1 0 A9 A8)地址 */
-    stcHsi2cMasterInit.u32SubAddr    = HSI2C_10BitAddrMdLowBitsGet(DEVICE_ADDR);  /* 10-bit从机2nd 8bits(A7~A0)地址 */
-    stcHsi2cMasterInit.u8SubAddrSize = 1;                                         /* 10-bit从机地址时：长度设置为1 */
+    stcHsi2cMasterInit.u8SlaveAddr = HSI2C_10BitAddrMdHighBitsGet(
+        DEVICE_ADDR); /* 10-bit从机1st 7bits(1 1 1 1 0 A9 A8)地址 */
+    stcHsi2cMasterInit.u32SubAddr = HSI2C_10BitAddrMdLowBitsGet(
+        DEVICE_ADDR); /* 10-bit从机2nd 8bits(A7~A0)地址 */
+    stcHsi2cMasterInit.u8SubAddrSize = 1; /* 10-bit从机地址时：长度设置为1 */
 #endif
     stcHsi2cMasterInit.enDir = Hsi2cMasterReadSlaveWrite;
 
-    stcHsi2cMasterInit.stcMasterConfig2.u32SdaFilterEnable = HSI2C_MASTER_FILTBPSDA_ENABLE;
-    stcHsi2cMasterInit.stcMasterConfig2.u32SclFilterEnable = HSI2C_MASTER_FILTBPSCL_ENABLE;
+    stcHsi2cMasterInit.stcMasterConfig2.u32SdaFilterEnable =
+        HSI2C_MASTER_FILTBPSDA_ENABLE;
+    stcHsi2cMasterInit.stcMasterConfig2.u32SclFilterEnable =
+        HSI2C_MASTER_FILTBPSCL_ENABLE;
 
-    if (Ok != HSI2C_MasterInit(HSI2C, &stcHsi2cMasterInit, SystemCoreClock))
-    {
-        while (1)
-        {
+    if (Ok != HSI2C_MasterInit(HSI2C, &stcHsi2cMasterInit, SystemCoreClock)) {
+        while (1) {
             ;
         }
     }
@@ -213,14 +218,15 @@ static void Hsi2cMasterReadConfig(void)
  */
 static void SysClockConfig(void)
 {
-    stc_sysctrl_clock_init_t stcSysClockInit = {0};
+    stc_sysctrl_clock_init_t stcSysClockInit = { 0 };
 
     /* 结构体初始化 */
     SYSCTRL_ClockStcInit(&stcSysClockInit);
 
-    stcSysClockInit.u32SysClockSrc = SYSCTRL_CLK_SRC_RC48M_48M; /* 选择系统默认RC48M 48MHz作为Hclk时钟源 */
-    stcSysClockInit.u32HclkDiv     = SYSCTRL_HCLK_PRS_DIV1;     /* Hclk 1分频 */
-    SYSCTRL_ClockInit(&stcSysClockInit);                        /* 系统时钟初始化 */
+    stcSysClockInit.u32SysClockSrc =
+        SYSCTRL_CLK_SRC_RC48M_48M; /* 选择系统默认RC48M 48MHz作为Hclk时钟源 */
+    stcSysClockInit.u32HclkDiv = SYSCTRL_HCLK_PRS_DIV1; /* Hclk 1分频 */
+    SYSCTRL_ClockInit(&stcSysClockInit); /* 系统时钟初始化 */
 }
 
 /**
@@ -229,7 +235,7 @@ static void SysClockConfig(void)
  */
 static void GpioConfig(void)
 {
-    stc_gpio_init_t stcGpioInit = {0};
+    stc_gpio_init_t stcGpioInit = { 0 };
 
     /* 结构体初始化 */
     GPIO_StcInit(&stcGpioInit);

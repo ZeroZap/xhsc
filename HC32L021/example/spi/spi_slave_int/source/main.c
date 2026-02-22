@@ -21,9 +21,9 @@
 /******************************************************************************
  * Include files
  ******************************************************************************/
-#include "ddl.h"
-#include "gpio.h"
-#include "spi.h"
+#include "hc32l021_ddl.h"
+#include "hc32l021_gpio.h"
+#include "hc32l021_spi.h"
 /******************************************************************************
  * Local pre-processor symbols/macros ('#define')
  ******************************************************************************/
@@ -38,8 +38,8 @@
  * Local variable definitions ('static')                                      *
  ******************************************************************************/
 /* 从机相关数据 */
-static uint16_t    u16SlaveRxBuf[LEN] = {0};
-static uint16_t    u16SlaveTxBuf[LEN] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+static uint16_t u16SlaveRxBuf[LEN] = { 0 };
+static uint16_t u16SlaveTxBuf[LEN] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 volatile boolean_t bFlagSendFinish;
 /******************************************************************************
  * Local function prototypes ('static')
@@ -65,28 +65,21 @@ int32_t main(void)
 
     SPI_Enable(SPI); /* SPI_SLAVE 使能 */
 
-    while (1)
-    {
-        if (TRUE == bFlagSendFinish)
-        {
+    while (1) {
+        if (TRUE == bFlagSendFinish) {
             bFlagSendFinish = FALSE;
 
             /* 判断发送的数据与接收的数据是否相等 */
-            for (u16Tmp = 0; u16Tmp < LEN; u16Tmp++)
-            {
-                if (u16SlaveRxBuf[u16Tmp] == u16SlaveTxBuf[u16Tmp])
-                {
+            for (u16Tmp = 0; u16Tmp < LEN; u16Tmp++) {
+                if (u16SlaveRxBuf[u16Tmp] == u16SlaveTxBuf[u16Tmp]) {
                     continue;
-                }
-                else
-                {
+                } else {
                     break;
                 }
             }
         }
 
-        if (LEN == u16Tmp)
-        {
+        if (LEN == u16Tmp) {
             DDL_Delay1ms(200);
             STK_LED_ON(); /* 开启LED */
             DDL_Delay1ms(200);
@@ -104,33 +97,27 @@ void Spi_IRQHandler(void)
     static uint8_t u8RxIndex = 0, u8TxIndex = 0;
 
     /* 接收数据*/
-    if (TRUE == SPI_FlagGet(SPI, SPI_FLAG_RXNE))
-    {
+    if (TRUE == SPI_FlagGet(SPI, SPI_FLAG_RXNE)) {
         SPI_FlagClear(SPI, SPI_FLAG_RXNE);
 
         u16SlaveRxBuf[u8RxIndex++] = SPI_DataReceive(SPI);
 
-        if (u8TxIndex < LEN)
-        {
-            while (FALSE == SPI->SR_f.TXE)
-            {
+        if (u8TxIndex < LEN) {
+            while (FALSE == SPI->SR_f.TXE) {
                 ;
             }
 
             SPI->DR = u16SlaveTxBuf[u8TxIndex];
 
             u8TxIndex++;
-        }
-        else
-        {
+        } else {
             u8TxIndex       = 0;
             u8RxIndex       = 0;
             bFlagSendFinish = TRUE;
         }
     }
 
-    if (TRUE == SPI_FlagGet(SPI, SPI_INT_SSF))
-    {
+    if (TRUE == SPI_FlagGet(SPI, SPI_INT_SSF)) {
         u8TxIndex = 1;
         SPI_SlaveDummyDataTransmit(SPI, u16SlaveTxBuf[0]);
         SPI_FlagClear(SPI, SPI_INT_SSF);
@@ -143,21 +130,22 @@ void Spi_IRQHandler(void)
  */
 static void GpioConfig(void)
 {
-    stc_gpio_init_t stcGpioInit = {0};
+    stc_gpio_init_t stcGpioInit = { 0 };
 
     SYSCTRL_PeriphClockEnable(PeriphClockGpio);
 
     /* 配置从机SPI端口 */
 
     /* 配置引脚PA2(SPI_MOSI)、PA3(SPI_SCK)、PA4(SPI_CS) */
-    GPIO_StcInit(&stcGpioInit);                                      /* 结构体变量初始值初始化 */
-    stcGpioInit.u32Mode   = GPIO_MD_INPUT;                           /* 端口方向配置 */
-    stcGpioInit.u32Pin    = GPIO_PIN_02 | GPIO_PIN_03 | GPIO_PIN_04; /* 端口引脚配置 */
-    stcGpioInit.u32PullUp = GPIO_PULL_NONE;                          /* 端口上拉配置 */
-    GPIOA_Init(&stcGpioInit);                                        /* 初始化GPIO */
+    GPIO_StcInit(&stcGpioInit);          /* 结构体变量初始值初始化 */
+    stcGpioInit.u32Mode = GPIO_MD_INPUT; /* 端口方向配置 */
+    stcGpioInit.u32Pin =
+        GPIO_PIN_02 | GPIO_PIN_03 | GPIO_PIN_04; /* 端口引脚配置 */
+    stcGpioInit.u32PullUp = GPIO_PULL_NONE;      /* 端口上拉配置 */
+    GPIOA_Init(&stcGpioInit);                    /* 初始化GPIO */
 
     /* 配置引脚PA1 */
-    GPIO_StcInit(&stcGpioInit);                /* 结构体变量初始值初始化 */
+    GPIO_StcInit(&stcGpioInit); /* 结构体变量初始值初始化 */
     stcGpioInit.u32Mode   = GPIO_MD_OUTPUT_PP; /* 端口方向配置 */
     stcGpioInit.u32Pin    = GPIO_PIN_01;       /* 端口引脚配置 */
     stcGpioInit.u32PullUp = GPIO_PULL_NONE;    /* 端口上拉配置 */
@@ -176,27 +164,30 @@ static void GpioConfig(void)
  */
 static void SpiConfig(void)
 {
-    stc_spi_init_t stcSpiInit = {0};
+    stc_spi_init_t stcSpiInit = { 0 };
 
     SYSCTRL_PeriphClockEnable(PeriphClockSpi); /* 开启SPI时钟门控 */
     SYSCTRL_PeriphReset(PeriphResetSpi);       /* 复位SPI模块 */
 
     /* SPI模块配置 从机 */
-    SPI_StcInit(&stcSpiInit);                       /* 结构体变量初始值初始化 */
-    stcSpiInit.u32CPHA      = SPI_CLK_PHASE_1EDGE;  /* 第一个边沿采样(第二个边沿移位) */
-    stcSpiInit.u32CPOL      = SPI_CLK_POLARITY_LOW; /* 待机时低电平 */
-    stcSpiInit.u32Mode      = SPI_MD_SLAVE;         /* 从机模式 */
-    stcSpiInit.u32BitOrder  = SPI_MSB_FIRST;        /* 最高有效位MSB收发在前 */
-    stcSpiInit.u32DataWidth = SPI_DATA_WIDTH_8BIT;  /* 8BIT数据宽度 */
-    stcSpiInit.u32NSS       = SPI_NSS_HARD_INPUT;   /* NSS信号由IO管脚输入 */
-    stcSpiInit.u32TransDir  = SPI_FULL_DUPLEX;      /* 全双工双向 */
+    SPI_StcInit(&stcSpiInit); /* 结构体变量初始值初始化 */
+    stcSpiInit.u32CPHA =
+        SPI_CLK_PHASE_1EDGE; /* 第一个边沿采样(第二个边沿移位) */
+    stcSpiInit.u32CPOL     = SPI_CLK_POLARITY_LOW; /* 待机时低电平 */
+    stcSpiInit.u32Mode     = SPI_MD_SLAVE;         /* 从机模式 */
+    stcSpiInit.u32BitOrder = SPI_MSB_FIRST; /* 最高有效位MSB收发在前 */
+    stcSpiInit.u32DataWidth = SPI_DATA_WIDTH_8BIT; /* 8BIT数据宽度 */
+    stcSpiInit.u32NSS = SPI_NSS_HARD_INPUT;   /* NSS信号由IO管脚输入 */
+    stcSpiInit.u32TransDir = SPI_FULL_DUPLEX; /* 全双工双向 */
 
     SPI_Init(SPI, &stcSpiInit); /* SPI初始化 */
 
     SPI_FlagClearALL(SPI); /* 清除所有中断标志位 */
 
-    SPI_IntEnable(SPI, (SPI_INT_RXNE | SPI_INT_SSF)); /* 使能接收缓冲非空中断和从机选择下降沿中断 */
-    EnableNvic(SPI_IRQn, IrqPriorityLevel3, TRUE);    /* NVIC 中断使能 */
+    SPI_IntEnable(
+        SPI, (SPI_INT_RXNE
+              | SPI_INT_SSF)); /* 使能接收缓冲非空中断和从机选择下降沿中断 */
+    EnableNvic(SPI_IRQn, IrqPriorityLevel3, TRUE); /* NVIC 中断使能 */
 }
 
 /******************************************************************************

@@ -21,10 +21,10 @@
 /******************************************************************************
  * Include files
  ******************************************************************************/
-#include "ddl.h"
-#include "gpio.h"
-#include "rtc.h"
-#include "sysctrl.h"
+#include "hc32l021_ddl.h"
+#include "hc32l021_gpio.h"
+#include "hc32l021_rtc.h"
+#include "hc32l021_sysctrl.h"
 /******************************************************************************
  * Local pre-processor symbols/macros ('#define')
  ******************************************************************************/
@@ -43,8 +43,8 @@ static void RtcTsConfig(void);
  * Local variable definitions ('static')
  ******************************************************************************/
 static stc_rtc_ts_t stcTsTime;
-volatile uint8_t    u8Flag;
-volatile uint8_t    u8Second, u8Minute, u8Hour, u8Day, u8Week, u8Month;
+volatile uint8_t u8Flag;
+volatile uint8_t u8Second, u8Minute, u8Hour, u8Day, u8Week, u8Month;
 /******************************************************************************
  * Local pre-processor symbols/macros ('#define')
  ******************************************************************************/
@@ -63,10 +63,8 @@ int32_t main(void)
     /* RTC时间戳触发配置 */
     RtcTsConfig();
 
-    while (1)
-    {
-        if (u8Flag == 1)
-        {
+    while (1) {
+        if (u8Flag == 1) {
             u8Flag = 0;
             RTC_TimestampGet(&stcTsTime);
             u8Second = stcTsTime.u8Second;
@@ -98,11 +96,12 @@ void Rtc_IRQHandler(void)
  */
 static void RtcConfig(void)
 {
-    SYSCTRL_PeriphClockEnable(PeriphClockRtc);           /* RTC模块时钟打开 */
-    SYSCTRL_ClockSrcEnable(SYSCTRL_CLK_SRC_XTL);         /* 打开XTL */
-    SYSCTRL_DebugActiveEnable(SYSCTRL_DEBUG_RTC_ACTIVE); /* debug时RTC正常计数 */
+    SYSCTRL_PeriphClockEnable(PeriphClockRtc);   /* RTC模块时钟打开 */
+    SYSCTRL_ClockSrcEnable(SYSCTRL_CLK_SRC_XTL); /* 打开XTL */
+    SYSCTRL_DebugActiveEnable(
+        SYSCTRL_DEBUG_RTC_ACTIVE); /* debug时RTC正常计数 */
 
-    stc_rtc_init_t stcRtcInit = {0};
+    stc_rtc_init_t stcRtcInit = { 0 };
 
     RTC_RtcStcInit(&stcRtcInit); /* 结构体初始化 */
 
@@ -132,7 +131,7 @@ static void RtcConfig(void)
  */
 static void RtcTsConfig(void)
 {
-    stc_gpio_init_t stcGpioInit = {0};
+    stc_gpio_init_t stcGpioInit = { 0 };
 
     SYSCTRL_PeriphClockEnable(PeriphClockGpio); /* GPIO模块时钟打开 */
 

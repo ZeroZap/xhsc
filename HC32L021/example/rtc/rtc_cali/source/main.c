@@ -21,10 +21,10 @@
 /******************************************************************************
  * Include files
  ******************************************************************************/
-#include "ddl.h"
-#include "gpio.h"
-#include "rtc.h"
-#include "sysctrl.h"
+#include "hc32l021_ddl.h"
+#include "hc32l021_gpio.h"
+#include "hc32l021_rtc.h"
+#include "hc32l021_sysctrl.h"
 /******************************************************************************
  * Local type definitions ('typedef')
  ******************************************************************************/
@@ -57,8 +57,7 @@ int32_t main(void)
     /* RTC配置 */
     RtcConfig();
 
-    while (1)
-    {
+    while (1) {
         ;
     }
 }
@@ -69,7 +68,7 @@ int32_t main(void)
  */
 static void GpioConfig(void)
 {
-    stc_gpio_init_t stcGpioInit = {0};
+    stc_gpio_init_t stcGpioInit = { 0 };
 
     GPIO_StcInit(&stcGpioInit); /* 初始值清零 */
 
@@ -89,14 +88,15 @@ static void GpioConfig(void)
  */
 static void RtcConfig(void)
 {
-    uint16_t  u16RtcCompValue = 0;
-    float32_t f32RtcCompUint  = 0;
+    uint16_t u16RtcCompValue = 0;
+    float32_t f32RtcCompUint = 0;
 
-    SYSCTRL_PeriphClockEnable(PeriphClockRtc);           /* RTC模块时钟打开 */
-    SYSCTRL_ClockSrcEnable(SYSCTRL_CLK_SRC_XTL);         /* 打开XTL */
-    SYSCTRL_DebugActiveEnable(SYSCTRL_DEBUG_RTC_ACTIVE); /* debug时RTC正常计数 */
+    SYSCTRL_PeriphClockEnable(PeriphClockRtc);   /* RTC模块时钟打开 */
+    SYSCTRL_ClockSrcEnable(SYSCTRL_CLK_SRC_XTL); /* 打开XTL */
+    SYSCTRL_DebugActiveEnable(
+        SYSCTRL_DEBUG_RTC_ACTIVE); /* debug时RTC正常计数 */
 
-    stc_rtc_init_t stcRtcInit = {0};
+    stc_rtc_init_t stcRtcInit = { 0 };
 
     RTC_RtcStcInit(&stcRtcInit); /* 结构体初始化 */
 
@@ -116,9 +116,12 @@ static void RtcConfig(void)
 
     f32RtcCompUint = 10; /* 补偿目标值 单位:ppm*/
 
-    if (Ok == RTC_CompValueCalculate(f32RtcCompUint, RTC_COMPEN_PRICISION_0P96PPM, &u16RtcCompValue)) /* 计算补偿寄存器值 */
+    if (Ok
+        == RTC_CompValueCalculate(f32RtcCompUint, RTC_COMPEN_PRICISION_0P96PPM,
+                                  &u16RtcCompValue)) /* 计算补偿寄存器值 */
     {
-        RTC_CompConfig(u16RtcCompValue, RTC_COMPEN_PRICISION_0P96PPM); /* 补偿配置 */
+        RTC_CompConfig(
+            u16RtcCompValue, RTC_COMPEN_PRICISION_0P96PPM); /* 补偿配置 */
     }
     RTC_CompEnable(); /* 补偿使能 */
 

@@ -21,11 +21,11 @@
 /******************************************************************************
  * Include files
  ******************************************************************************/
-#include "ddl.h"
-#include "flash.h"
-#include "gpio.h"
-#include "spi.h"
-#include "sysctrl.h"
+#include "hc32l021_ddl.h"
+#include "hc32l021_flash.h"
+#include "hc32l021_gpio.h"
+#include "hc32l021_spi.h"
+#include "hc32l021_sysctrl.h"
 /******************************************************************************
  * Local pre-processor symbols/macros ('#define')
  ******************************************************************************/
@@ -40,7 +40,7 @@
  * Local variable definitions ('static')                                      *
  ******************************************************************************/
 /* 主机相关数据 */
-static __attribute((used)) uint16_t u16MasterTxBuf[LEN] = {0};
+static __attribute((used)) uint16_t u16MasterTxBuf[LEN] = { 0 };
 /******************************************************************************
  * Local function prototypes ('static')
  ******************************************************************************/
@@ -69,8 +69,7 @@ int32_t main(void)
     SpiConfig(); /* SPI_MASTER 配置 */
 
     /* 初始化数组 */
-    for (u16Index = 0; u16Index < LEN; u16Index++)
-    {
+    for (u16Index = 0; u16Index < LEN; u16Index++) {
         u16MasterTxBuf[u16Index] = u16Index + 1;
     }
 
@@ -86,22 +85,19 @@ int32_t main(void)
     SPI_MasterNSSOutput(SPI, SPI_NSS_CONFIG_ENABLE); /* 拉低NSS选中从机 */
 
     /* 发送数据 */
-    for (u16Index = 0; u16Index < LEN; u16Index++)
-    {
+    for (u16Index = 0; u16Index < LEN; u16Index++) {
         /* 发送数据到从机 */
         SPI->DR = u16MasterTxBuf[u16Index];
 
         /* 等待发送完成 */
-        while (TRUE == SPI->SR_f.BUSY)
-        {
+        while (TRUE == SPI->SR_f.BUSY) {
             ;
         }
     }
 
     SPI_MasterNSSOutput(SPI, SPI_NSS_CONFIG_DISABLE); /* 拉高NSS */
 
-    while (1)
-    {
+    while (1) {
         ;
     }
 }
@@ -120,10 +116,11 @@ static void GpioConfig(void)
     GPIO_StcInit(&stcGpioInit);
 
     /* 配置主机SPI端口 */
-    stcGpioInit.u32Mode   = GPIO_MD_OUTPUT_PP;                       /* 端口方向配置 */
-    stcGpioInit.u32Pin    = GPIO_PIN_02 | GPIO_PIN_03 | GPIO_PIN_04; /* 端口引脚配置 */
-    stcGpioInit.u32PullUp = GPIO_PULL_NONE;                          /* 端口上拉配置 */
-    GPIOA_Init(&stcGpioInit);                                        /* 初始化GPIO */
+    stcGpioInit.u32Mode = GPIO_MD_OUTPUT_PP; /* 端口方向配置 */
+    stcGpioInit.u32Pin =
+        GPIO_PIN_02 | GPIO_PIN_03 | GPIO_PIN_04; /* 端口引脚配置 */
+    stcGpioInit.u32PullUp = GPIO_PULL_NONE;      /* 端口上拉配置 */
+    GPIOA_Init(&stcGpioInit);                    /* 初始化GPIO */
 
     /* 设置PA2、PA3、PA4的复用功能 */
     GPIO_PA02_AF_SPI_MOSI(); /* 配置引脚PA2作为SPI_MOSI */
@@ -137,22 +134,23 @@ static void GpioConfig(void)
  */
 static void SpiConfig(void)
 {
-    stc_spi_init_t stcSpiInit = {0};
+    stc_spi_init_t stcSpiInit = { 0 };
 
     SYSCTRL_PeriphClockEnable(PeriphClockSpi); /* 开启SPI时钟门控 */
     SYSCTRL_PeriphReset(PeriphResetSpi);       /* 复位SPI模块 */
 
     /* SPI模块配置：主机 */
-    SPI_StcInit(&stcSpiInit);                           /* 结构体变量初始值初始化 */
-    stcSpiInit.u32BaudRate    = SPI_BAUDRATE_PCLK_DIV8; /* PCLK/8 */
-    stcSpiInit.u32CPHA        = SPI_CLK_PHASE_1EDGE;    /* 第一个边沿采样(第二个边沿移位) */
-    stcSpiInit.u32CPOL        = SPI_CLK_POLARITY_LOW;   /* 待机时低电平 */
-    stcSpiInit.u32Mode        = SPI_MD_MASTER;          /* 主机模式 */
-    stcSpiInit.u32BitOrder    = SPI_MSB_FIRST;          /* 最高有效位MSB收发在前 */
-    stcSpiInit.u32DataWidth   = SPI_DATA_WIDTH_8BIT;    /* 8BIT数据宽度 */
-    stcSpiInit.u32NSS         = SPI_NSS_HARD_OUTPUT;    /* NSS信号由IO管脚输出 */
-    stcSpiInit.u32TransDir    = SPI_SIMPLE_TX;          /* 单工单向发送 */
-    stcSpiInit.u32SampleDelay = SPI_SAMPLE_NORMAL;      /* 正常采样 */
+    SPI_StcInit(&stcSpiInit); /* 结构体变量初始值初始化 */
+    stcSpiInit.u32BaudRate = SPI_BAUDRATE_PCLK_DIV8; /* PCLK/8 */
+    stcSpiInit.u32CPHA =
+        SPI_CLK_PHASE_1EDGE; /* 第一个边沿采样(第二个边沿移位) */
+    stcSpiInit.u32CPOL     = SPI_CLK_POLARITY_LOW; /* 待机时低电平 */
+    stcSpiInit.u32Mode     = SPI_MD_MASTER;        /* 主机模式 */
+    stcSpiInit.u32BitOrder = SPI_MSB_FIRST; /* 最高有效位MSB收发在前 */
+    stcSpiInit.u32DataWidth = SPI_DATA_WIDTH_8BIT; /* 8BIT数据宽度 */
+    stcSpiInit.u32NSS = SPI_NSS_HARD_OUTPUT;   /* NSS信号由IO管脚输出 */
+    stcSpiInit.u32TransDir    = SPI_SIMPLE_TX; /* 单工单向发送 */
+    stcSpiInit.u32SampleDelay = SPI_SAMPLE_NORMAL; /* 正常采样 */
 
     SPI_Init(SPI, &stcSpiInit); /* SPI初始化 */
     SPI_FlagClearALL(SPI);      /* 清除所有中断标志位 */
@@ -164,14 +162,15 @@ static void SpiConfig(void)
  */
 static void SysClockConfig(void)
 {
-    stc_sysctrl_clock_init_t stcSysClockInit = {0};
+    stc_sysctrl_clock_init_t stcSysClockInit = { 0 };
 
     /* 结构体初始化 */
     SYSCTRL_ClockStcInit(&stcSysClockInit);
 
-    stcSysClockInit.u32SysClockSrc = SYSCTRL_CLK_SRC_RC48M_4M; /* 选择系统默认RC48M 4MHz作为Hclk时钟源 */
-    stcSysClockInit.u32HclkDiv     = SYSCTRL_HCLK_PRS_DIV1;    /* Hclk 1分频 */
-    SYSCTRL_ClockInit(&stcSysClockInit);                       /* 系统时钟初始化 */
+    stcSysClockInit.u32SysClockSrc =
+        SYSCTRL_CLK_SRC_RC48M_4M; /* 选择系统默认RC48M 4MHz作为Hclk时钟源 */
+    stcSysClockInit.u32HclkDiv = SYSCTRL_HCLK_PRS_DIV1; /* Hclk 1分频 */
+    SYSCTRL_ClockInit(&stcSysClockInit); /* 系统时钟初始化 */
 }
 /******************************************************************************
  * EOF (not truncated)

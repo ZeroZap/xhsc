@@ -21,9 +21,9 @@
 /******************************************************************************
  * Include files
  ******************************************************************************/
-#include "flash.h"
-#include "gpio.h"
-#include "lpm.h"
+#include "hc32l021_flash.h"
+#include "hc32l021_gpio.h"
+#include "hc32l021_lpm.h"
 /*******************************************************************************
  * Local type definitions ('typedef')
  ******************************************************************************/
@@ -64,12 +64,13 @@ int32_t main(void)
 
     FLASH_LowPowerEnable(); /* 配置FLASH为低功耗模式 */
 
-    GpioLowPowerConfig(); /* 配置Demo板上所有引脚配置为模拟端口(除按键、LED端口外),避免端口漏电 */
+    GpioLowPowerConfig(); /* 配置Demo板上所有引脚配置为模拟端口(除按键、LED端口外),避免端口漏电
+                           */
 
-    LPM_GotoDeepSleep(TRUE); /* 进入低功耗模式——深度休眠（使能唤醒后退出中断自动休眠特性） */
+    LPM_GotoDeepSleep(
+        TRUE); /* 进入低功耗模式——深度休眠（使能唤醒后退出中断自动休眠特性） */
 
-    while (1)
-    {
+    while (1) {
         ;
     }
 }
@@ -98,7 +99,7 @@ void PortA_IRQHandler(void)
  */
 static void GpioLowPowerConfig(void)
 {
-    SYSCTRL_PeriphClockEnable(PeriphClockGpio);  /* 打开GPIO外设时钟门控 */
+    SYSCTRL_PeriphClockEnable(PeriphClockGpio); /* 打开GPIO外设时钟门控 */
     SYSCTRL_FuncEnable(SYSCTRL_FUNC_SWD_USE_IO); /* SWD设置为GPIO */
 
     GPIOA->ADS = 0xEFFEu; /* 配置为模拟端口(除按键、LED端口外) */
@@ -110,16 +111,16 @@ static void GpioLowPowerConfig(void)
  */
 static void GpioUserKeyConfig(void)
 {
-    stc_gpio_init_t stcGpioInit = {0};
+    stc_gpio_init_t stcGpioInit = { 0 };
 
     SYSCTRL_PeriphClockEnable(PeriphClockGpio); /* 打开GPIO外设时钟门控 */
 
-    GPIO_StcInit(&stcGpioInit);                      /* 结构体变量初始值初始化 */
-    stcGpioInit.u32Mode      = GPIO_MD_INT_INPUT;    /* 端口方向配置 */
-    stcGpioInit.u32PullUp    = GPIO_PULL_NONE;       /* 端口上下拉配置 */
-    stcGpioInit.u32ExternInt = GPIO_EXTI_FALLING;    /* 端口外部中断触发方式配置 */
-    stcGpioInit.u32Pin       = STK_USER_PIN;         /* 端口引脚配置 */
-    GPIOA_Init(&stcGpioInit);                        /* GPIO USER KEY初始化 */
+    GPIO_StcInit(&stcGpioInit); /* 结构体变量初始值初始化 */
+    stcGpioInit.u32Mode   = GPIO_MD_INT_INPUT; /* 端口方向配置 */
+    stcGpioInit.u32PullUp = GPIO_PULL_NONE;    /* 端口上下拉配置 */
+    stcGpioInit.u32ExternInt = GPIO_EXTI_FALLING; /* 端口外部中断触发方式配置 */
+    stcGpioInit.u32Pin = STK_USER_PIN; /* 端口引脚配置 */
+    GPIOA_Init(&stcGpioInit);          /* GPIO USER KEY初始化 */
     EnableNvic(PORTA_IRQn, IrqPriorityLevel3, TRUE); /* 使能端口PORTA系统中断 */
 }
 

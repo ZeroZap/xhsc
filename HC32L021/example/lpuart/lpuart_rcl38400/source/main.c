@@ -21,11 +21,11 @@
 /*******************************************************************************
  * Include files
  ******************************************************************************/
-#include "ddl.h"
-#include "gpio.h"
-#include "lpm.h"
-#include "lpuart.h"
-#include "sysctrl.h"
+#include "hc32l021_ddl.h"
+#include "hc32l021_gpio.h"
+#include "hc32l021_lpm.h"
+#include "hc32l021_lpuart.h"
+#include "hc32l021_sysctrl.h"
 /*******************************************************************************
  * Local type definitions ('typedef')
  ******************************************************************************/
@@ -36,9 +36,9 @@
 #define BAUD_SRC_CLK    (38400u)   /* SCLK频率值 */
 #define RX_TX_FRAME_LEN (10u)      /* 通信帧长度 */
 #define TIMEOUT_VALUE   (0xFFFFFu) /* 超时时间  */
-                                   /* 注：请结合波特率、主频和数据帧长度等设置 \
-                                           合适的超时值，以避免数据帧发送和接收  \
-                                           的丢失或失败。                       */
+/* 注：请结合波特率、主频和数据帧长度等设置 \
+        合适的超时值，以避免数据帧发送和接收  \
+        的丢失或失败。                       */
 /*******************************************************************************
  * Global variable definitions (declared in header file with 'extern')
  ******************************************************************************/
@@ -50,7 +50,7 @@ static void LpuartConfig(void);
 /*******************************************************************************
  * Local variable definitions ('static')
  ******************************************************************************/
-static uint8_t au8RxData[RX_TX_FRAME_LEN] = {0};
+static uint8_t au8RxData[RX_TX_FRAME_LEN] = { 0 };
 /*******************************************************************************
  * Function implementation - global ('extern') and local ('static')
  ******************************************************************************/
@@ -66,14 +66,16 @@ int32_t main(void)
     /* LPUART配置 */
     LpuartConfig();
 
-    while (1)
-    {
-        if (Ok == (LPUART_ReceivePollTimeOut(LPUART1, au8RxData, RX_TX_FRAME_LEN, TIMEOUT_VALUE))) /* 从上位机接收RX_TX_FRAME_LEN长度数据完成 */
+    while (1) {
+        if (Ok
+            == (LPUART_ReceivePollTimeOut(
+                LPUART1, au8RxData, RX_TX_FRAME_LEN,
+                TIMEOUT_VALUE))) /* 从上位机接收RX_TX_FRAME_LEN长度数据完成 */
         {
-            LPUART_TransmitPollTimeOut(LPUART1, au8RxData, RX_TX_FRAME_LEN, TIMEOUT_VALUE); /* 将收到的数据发送到上位机 */
-        }
-        else
-        {
+            LPUART_TransmitPollTimeOut(
+                LPUART1, au8RxData, RX_TX_FRAME_LEN,
+                TIMEOUT_VALUE); /* 将收到的数据发送到上位机 */
+        } else {
             ;
             /* 添加出错处理 */
         }
@@ -86,8 +88,8 @@ int32_t main(void)
  */
 static void LpuartConfig(void)
 {
-    uint32_t          u32CalBaudRate = 0u;
-    stc_lpuart_init_t stcLpuartInit  = {0};
+    uint32_t u32CalBaudRate         = 0u;
+    stc_lpuart_init_t stcLpuartInit = { 0 };
 
     /* 使能38.4K，并加载其TRIM值 */
     SYSCTRL_ClockSrcEnable(SYSCTRL_CLK_SRC_RCL_38400);
@@ -97,19 +99,21 @@ static void LpuartConfig(void)
     SYSCTRL_PeriphClockEnable(PeriphClockLpuart1);
 
     /* LPUART 初始化 */
-    LPUART_StcInit(&stcLpuartInit);                                    /* 结构体初始化 */
-    stcLpuartInit.u32TransMode              = LPUART_MODE_TX_RX;       /* 收发模式 */
-    stcLpuartInit.u32FrameLength            = LPUART_FRAME_LEN_8B_PAR; /* 数据8位，奇偶校验1位 */
-    stcLpuartInit.u32Parity                 = LPUART_B8_PARITY_EVEN;   /* 偶校验 */
-    stcLpuartInit.u32StopBits               = LPUART_STOPBITS_1;       /* 1停止位 */
-    stcLpuartInit.u32BaudRateGenSelect      = LPUART_BAUD_NORMAL;      /* 波特率生成选择：用OVER和SCNT产生波特率 */
-    stcLpuartInit.stcBaudRate.u32SclkSelect = LPUART_SCLK_SEL_RCL;     /* 传输时钟源 */
-    stcLpuartInit.stcBaudRate.u32Sclk       = BAUD_SRC_CLK;            /* 时钟频率 */
-    stcLpuartInit.stcBaudRate.u32Baud       = BAUD_RATE;               /* 波特率 */
-    u32CalBaudRate                          = LPUART_Init(LPUART1, &stcLpuartInit);
+    LPUART_StcInit(&stcLpuartInit);                 /* 结构体初始化 */
+    stcLpuartInit.u32TransMode = LPUART_MODE_TX_RX; /* 收发模式 */
+    stcLpuartInit.u32FrameLength =
+        LPUART_FRAME_LEN_8B_PAR; /* 数据8位，奇偶校验1位 */
+    stcLpuartInit.u32Parity   = LPUART_B8_PARITY_EVEN; /* 偶校验 */
+    stcLpuartInit.u32StopBits = LPUART_STOPBITS_1;     /* 1停止位 */
+    stcLpuartInit.u32BaudRateGenSelect =
+        LPUART_BAUD_NORMAL; /* 波特率生成选择：用OVER和SCNT产生波特率 */
+    stcLpuartInit.stcBaudRate.u32SclkSelect =
+        LPUART_SCLK_SEL_RCL;                          /* 传输时钟源 */
+    stcLpuartInit.stcBaudRate.u32Sclk = BAUD_SRC_CLK; /* 时钟频率 */
+    stcLpuartInit.stcBaudRate.u32Baud = BAUD_RATE;    /* 波特率 */
+    u32CalBaudRate                    = LPUART_Init(LPUART1, &stcLpuartInit);
 
-    if (0u != u32CalBaudRate)
-    {
+    if (0u != u32CalBaudRate) {
         /* 有效设置，可通过查看u32CalBaudRate的值确认当前计算的波特率 */
     }
 
@@ -122,7 +126,7 @@ static void LpuartConfig(void)
  */
 static void GpioConfig(void)
 {
-    stc_gpio_init_t stcGpioInit = {0};
+    stc_gpio_init_t stcGpioInit = { 0 };
 
     /* 外设模块时钟使能 */
     SYSCTRL_PeriphClockEnable(PeriphClockGpio);

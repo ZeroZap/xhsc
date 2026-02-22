@@ -22,8 +22,8 @@
 /*******************************************************************************
  * Include files
  ******************************************************************************/
-#include "gpio.h"
-#include "lpuart.h"
+#include "hc32l021_gpio.h"
+#include "hc32l021_lpuart.h"
 /*******************************************************************************
  * Local type definitions ('typedef')
  ******************************************************************************/
@@ -44,10 +44,12 @@ static void LpuartConfig(void);
 /*******************************************************************************
  * Local variable definitions ('static')
  ******************************************************************************/
-volatile uint8_t au8MasterTxData[RX_TX_FRAME_LEN] = {0x00u, 0x01u, 0x02u, 0x03u, 0x04u, 0x05u, 0x06u, 0x07u, 0x08u, 0x09u};
-volatile uint8_t au8MasterRxData[RX_TX_FRAME_LEN] = {0x00u};
-static uint8_t   u8TxCount                        = 0u;
-static uint8_t   u8RxCount                        = 0u;
+volatile uint8_t au8MasterTxData[RX_TX_FRAME_LEN] = {
+    0x00u, 0x01u, 0x02u, 0x03u, 0x04u, 0x05u, 0x06u, 0x07u, 0x08u, 0x09u
+};
+volatile uint8_t au8MasterRxData[RX_TX_FRAME_LEN] = { 0x00u };
+static uint8_t u8TxCount                          = 0u;
+static uint8_t u8RxCount                          = 0u;
 /*******************************************************************************
  * Function implementation - global ('extern') and local ('static')
  ******************************************************************************/
@@ -66,8 +68,7 @@ int32_t main(void)
     /* 主机发送从机地址，接下来中断中发送数据 */
     LPUART1->SBUF = LPUART_D8_ADDR | SLAVE_ADDR;
 
-    while (1)
-    {
+    while (1) {
         ;
     }
 }
@@ -79,42 +80,37 @@ int32_t main(void)
 void LpUart1_IRQHandler(void)
 {
     /* 接收出错处理（PE/FE） */
-    if (LPUART_IntFlagGet(LPUART1, LPUART_FLAG_FE))
-    {
+    if (LPUART_IntFlagGet(LPUART1, LPUART_FLAG_FE)) {
         LPUART_IntFlagClear(LPUART1, LPUART_FLAG_FE); /* 清帧错误请求 */
         /* 添加出错处理 */
     }
-    if (LPUART_IntFlagGet(LPUART1, LPUART_FLAG_PE))
-    {
+    if (LPUART_IntFlagGet(LPUART1, LPUART_FLAG_PE)) {
         LPUART_IntFlagClear(LPUART1, LPUART_FLAG_PE); /* 清奇偶检验错误请求 */
         /* 添加出错处理 */
     }
 
     /* 主机数据发送 */
-    if (LPUART_IntFlagGet(LPUART1, LPUART_FLAG_TC))
-    {
+    if (LPUART_IntFlagGet(LPUART1, LPUART_FLAG_TC)) {
         if (u8TxCount >= RX_TX_FRAME_LEN) /* 已经发送完帧数据 */
         {
             LPUART_IntDisable(LPUART1, LPUART_INT_TC); /* 禁止发送中断 */
             LPUART_IntEnable(LPUART1, LPUART_INT_RC);  /* 使能接收中断 */
             u8TxCount = 0u;
-        }
-        else
-        {
-            while (FALSE == LPUART_IntFlagGet(LPUART1, LPUART_FLAG_TXE))
-            {
+        } else {
+            while (FALSE == LPUART_IntFlagGet(LPUART1, LPUART_FLAG_TXE)) {
                 ;
             }
-            LPUART_DataTransmit(LPUART1, au8MasterTxData[u8TxCount++]); /* 发送数据 */
+            LPUART_DataTransmit(
+                LPUART1, au8MasterTxData[u8TxCount++]); /* 发送数据 */
         }
         LPUART_IntFlagClear(LPUART1, LPUART_FLAG_TC);
     }
 
     /* 主机数据接收 */
-    if ((LPUART_IntFlagGet(LPUART1, LPUART_FLAG_RC)))
-    {
-        au8MasterRxData[u8RxCount++] = LPUART_DataReceive(LPUART1); /* 接收数据 */
-        if (u8RxCount >= RX_TX_FRAME_LEN)                           /* 已经接收完帧数据 */
+    if ((LPUART_IntFlagGet(LPUART1, LPUART_FLAG_RC))) {
+        au8MasterRxData[u8RxCount++] =
+            LPUART_DataReceive(LPUART1);  /* 接收数据 */
+        if (u8RxCount >= RX_TX_FRAME_LEN) /* 已经接收完帧数据 */
         {
             LPUART_IntDisable(LPUART1, LPUART_INT_RC); /* 禁止接收中断 */
             u8RxCount = 0u;
@@ -129,7 +125,7 @@ void LpUart1_IRQHandler(void)
  */
 static void GpioConfig(void)
 {
-    stc_gpio_init_t stcGpioInit = {0};
+    stc_gpio_init_t stcGpioInit = { 0 };
 
     /* 外设模块时钟使能 */
     SYSCTRL_PeriphClockEnable(PeriphClockGpio);
@@ -157,31 +153,33 @@ static void GpioConfig(void)
  */
 static void LpuartConfig(void)
 {
-    uint32_t          u32CalBaudRate = 0u;
-    stc_lpuart_init_t stcLpuartInit  = {0};
+    uint32_t u32CalBaudRate         = 0u;
+    stc_lpuart_init_t stcLpuartInit = { 0 };
 
     /* 外设模块时钟使能 */
     SYSCTRL_PeriphClockEnable(PeriphClockLpuart1);
 
     /* LPUART 初始化 */
-    LPUART_StcInit(&stcLpuartInit);                                         /* 结构体初始化 */
-    stcLpuartInit.u32TransMode              = LPUART_MODE_TX_RX;            /* 收发模式 */
-    stcLpuartInit.u32FrameLength            = LPUART_FRAME_LEN_8B_PAR;      /* 数据8位、奇偶校验1位  */
-    stcLpuartInit.u32Parity                 = LPUART_B8_MULTI_DATA_OR_ADDR; /* 多机模式 */
-    stcLpuartInit.u32StopBits               = LPUART_STOPBITS_1;            /* 1停止位 */
-    stcLpuartInit.u32BaudRateGenSelect      = LPUART_BAUD_NORMAL;           /* 波特率生成选择：用OVER和SCNT产生波特率 */
-    stcLpuartInit.stcBaudRate.u32SclkSelect = LPUART_SCLK_SEL_PCLK;         /* 传输时钟源 */
-    stcLpuartInit.stcBaudRate.u32Sclk       = SYSCTRL_HclkFreqGet();        /* HCLK获取 */
-    stcLpuartInit.stcBaudRate.u32Baud       = BAUD_RATE;                    /* 波特率 */
-    u32CalBaudRate                          = LPUART_Init(LPUART1, &stcLpuartInit);
+    LPUART_StcInit(&stcLpuartInit);                 /* 结构体初始化 */
+    stcLpuartInit.u32TransMode = LPUART_MODE_TX_RX; /* 收发模式 */
+    stcLpuartInit.u32FrameLength =
+        LPUART_FRAME_LEN_8B_PAR; /* 数据8位、奇偶校验1位  */
+    stcLpuartInit.u32Parity   = LPUART_B8_MULTI_DATA_OR_ADDR; /* 多机模式 */
+    stcLpuartInit.u32StopBits = LPUART_STOPBITS_1;            /* 1停止位 */
+    stcLpuartInit.u32BaudRateGenSelect =
+        LPUART_BAUD_NORMAL; /* 波特率生成选择：用OVER和SCNT产生波特率 */
+    stcLpuartInit.stcBaudRate.u32SclkSelect =
+        LPUART_SCLK_SEL_PCLK; /* 传输时钟源 */
+    stcLpuartInit.stcBaudRate.u32Sclk = SYSCTRL_HclkFreqGet(); /* HCLK获取 */
+    stcLpuartInit.stcBaudRate.u32Baud = BAUD_RATE;             /* 波特率 */
+    u32CalBaudRate                    = LPUART_Init(LPUART1, &stcLpuartInit);
 
-    if (0u != u32CalBaudRate)
-    {
+    if (0u != u32CalBaudRate) {
         /* 有效设置，可通过查看u32CalBaudRate的值确认当前计算的波特率 */
     }
 
-    LPUART_IntFlagClearAll(LPUART1);                   /* 清除所有状态标志 */
-    LPUART_IntEnable(LPUART1, LPUART_INT_TC);          /* 使能串口发送完成中断 */
+    LPUART_IntFlagClearAll(LPUART1);          /* 清除所有状态标志 */
+    LPUART_IntEnable(LPUART1, LPUART_INT_TC); /* 使能串口发送完成中断 */
     EnableNvic(LPUART1_IRQn, IrqPriorityLevel3, TRUE); /* 系统中断使能 */
 }
 

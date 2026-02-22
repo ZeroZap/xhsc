@@ -21,10 +21,10 @@
 /******************************************************************************
  * Include files
  ******************************************************************************/
-#include "flash.h"
-#include "gpio.h"
-#include "lpm.h"
-#include "rtc.h"
+#include "hc32l021_flash.h"
+#include "hc32l021_gpio.h"
+#include "hc32l021_lpm.h"
+#include "hc32l021_rtc.h"
 /******************************************************************************
  * Local pre-processor symbols/macros ('#define')
  ******************************************************************************/
@@ -58,15 +58,16 @@ int32_t main(void)
     DDL_Delay1ms(3000);     /* 延时3秒 */
     RtcWakeupTimerConfig(); /* RTC唤醒定时器配置 */
 
-    while (1)
-    {
+    while (1) {
         if (TRUE == STK_USER_KEY_PRESSED()) /* 等待按键按下 */
         {
             FLASH_LowPowerEnable(); /* 配置FLASH为低功耗模式 */
 
-            GpioLowPowerConfig(); /* 配置Demo板上所有引脚配置为模拟端口(除按键、LED端口外),避免端口漏电 */
+            GpioLowPowerConfig(); /* 配置Demo板上所有引脚配置为模拟端口(除按键、LED端口外),避免端口漏电
+                                   */
 
-            LPM_GotoDeepSleep(TRUE); /* 进入低功耗深度睡眠模式，中断唤醒执行完中断自动进入低功耗模式 */
+            LPM_GotoDeepSleep(TRUE); /* 进入低功耗深度睡眠模式，中断唤醒执行完中断自动进入低功耗模式
+                                      */
         }
     }
 }
@@ -77,15 +78,11 @@ int32_t main(void)
  */
 void Rtc_IRQHandler(void)
 {
-    if (RTC_IntFlagGet(RTC_INT_WU) == TRUE)
-    {
+    if (RTC_IntFlagGet(RTC_INT_WU) == TRUE) {
         RTC_IntFlagClear(RTC_INT_WU); /* 清除中断标志位 */
-        if (STK_LED_READ())
-        {
+        if (STK_LED_READ()) {
             STK_LED_OFF(); /* 输出低，熄灭LED */
-        }
-        else
-        {
+        } else {
             STK_LED_ON(); /* 输出高，点亮LED */
         }
     }
@@ -97,11 +94,12 @@ void Rtc_IRQHandler(void)
  */
 static void RtcConfig(void)
 {
-    SYSCTRL_PeriphClockEnable(PeriphClockRtc);           /* RTC模块时钟打开 */
-    SYSCTRL_ClockSrcEnable(SYSCTRL_CLK_SRC_XTL);         /* 打开XTL */
-    SYSCTRL_DebugActiveEnable(SYSCTRL_DEBUG_RTC_ACTIVE); /* Debug时RTC正常计数 */
+    SYSCTRL_PeriphClockEnable(PeriphClockRtc);   /* RTC模块时钟打开 */
+    SYSCTRL_ClockSrcEnable(SYSCTRL_CLK_SRC_XTL); /* 打开XTL */
+    SYSCTRL_DebugActiveEnable(
+        SYSCTRL_DEBUG_RTC_ACTIVE); /* Debug时RTC正常计数 */
 
-    stc_rtc_init_t stcRtcInit = {0};
+    stc_rtc_init_t stcRtcInit = { 0 };
 
     RTC_RtcStcInit(&stcRtcInit); /* 结构体初始化 */
 
@@ -146,11 +144,11 @@ static void RtcWakeupTimerConfig(void)
 {
     RTC_Unlock(); /* RTC写保护解锁 */
 
-    RTC_WakeupTimerDisable();                     /* 先关闭RTC wakeup timer */
+    RTC_WakeupTimerDisable(); /* 先关闭RTC wakeup timer */
     RTC_WakeupTimerClockSelect(RTC_WUTR_SECDIV1); /* RTC wakeup timer选择时钟 */
-    RTC_WakeupTimerCycleSet(5u);                  /* RTC wakeup timer设置计数值，倒计时 */
-    RTC_IntEnable(RTC_INT_WU);                    /* 使能wakeup timer中断 */
-    RTC_WakeupTimerEnable();                      /* 使能wakeup timer计数 */
+    RTC_WakeupTimerCycleSet(5u); /* RTC wakeup timer设置计数值，倒计时 */
+    RTC_IntEnable(RTC_INT_WU);   /* 使能wakeup timer中断 */
+    RTC_WakeupTimerEnable();     /* 使能wakeup timer计数 */
 
     RTC_StartWait(); /* 进入低功耗模式之前需执行此函数，以确保RTC已启动完成 */
 

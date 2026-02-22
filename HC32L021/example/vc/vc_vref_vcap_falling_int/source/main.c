@@ -22,8 +22,8 @@
 /******************************************************************************
  * Include files
  ******************************************************************************/
-#include "gpio.h"
-#include "vc.h"
+#include "hc32l021_gpio.h"
+#include "hc32l021_vc.h"
 /******************************************************************************
  * Local type definitions ('typedef')
  ******************************************************************************/
@@ -55,8 +55,7 @@ int32_t main(void)
     Vc1Config();       /* VC1配置 */
     VC_Enable(VC_CH1); /* VC1使能 */
 
-    while (1)
-    {
+    while (1) {
         ;
     }
 }
@@ -67,8 +66,7 @@ int32_t main(void)
  */
 void Vc1_IRQHandler(void)
 {
-    if (VC_IntFlagGet(VC_CH1) == TRUE)
-    {
+    if (VC_IntFlagGet(VC_CH1) == TRUE) {
         VC_IntFlagClear(VC_CH1);
 
         STK_LED_ON();
@@ -84,7 +82,7 @@ void Vc1_IRQHandler(void)
  */
 static void GpioConfig(void)
 {
-    stc_gpio_init_t stcGpioInit = {0};
+    stc_gpio_init_t stcGpioInit = { 0 };
 
     /* GPIOA 外设时钟使能 */
     SYSCTRL_PeriphClockEnable(PeriphClockGpio);
@@ -109,23 +107,25 @@ static void GpioConfig(void)
  */
 static void Vc1Config(void)
 {
-    stc_vc_init_t stcVcInit = {0};
+    stc_vc_init_t stcVcInit = { 0 };
 
     VC_StcInit(&stcVcInit); /* 结构体初始化 */
 
     SYSCTRL_PeriphClockEnable(PeriphClockVc); /* 开启VC时钟 */
 
-    stcVcInit.u32Ch           = VC_CH1;                  /* 使用VC1 */
-    stcVcInit.u32HysVolt      = VC_HYSTERESIS_VOLT_10MV; /* 迟滞电压约为10mV */
-    stcVcInit.u32BiasCurrent  = VC_BIAS_CURR_MEDIUM;     /* 中功耗 */
-    stcVcInit.u32FilterTime   = VC_FILTER_TIME_16CYCLE;  /* 滤波时间设置16个滤波时钟周期 */
-    stcVcInit.u32InputPos     = VC_POS_SEL_CH0;          /* 电压比较器的P端连接PA01 */
-    stcVcInit.u32InputNeg     = VC_NEG_SEL_CH5;          /* 电压比较器的N端连接内核VCAP */
-    stcVcInit.u32FilterClk    = VC_FILTER_CLK_RC256K;    /* 滤波时钟RC256K */
-    stcVcInit.u32FilterMode   = VC_FILTER_MD_NFM;        /* 普通滤波模式 */
-    stcVcInit.u32OutputPol    = VC_OUTPUT_POL_POS;       /* 输出极性正 */
-    stcVcInit.u32IntMode      = VC_INT_MD_FALLING;       /* 下降沿中断 */
-    stcVcInit.u8TrimSetSelect = VC_TRIM_LOWER_0P5AVCC;   /* 正端或负端的参考电压小于等于1/2 AVCC */
+    stcVcInit.u32Ch      = VC_CH1;                  /* 使用VC1 */
+    stcVcInit.u32HysVolt = VC_HYSTERESIS_VOLT_10MV; /* 迟滞电压约为10mV */
+    stcVcInit.u32BiasCurrent = VC_BIAS_CURR_MEDIUM; /* 中功耗 */
+    stcVcInit.u32FilterTime =
+        VC_FILTER_TIME_16CYCLE; /* 滤波时间设置16个滤波时钟周期 */
+    stcVcInit.u32InputPos = VC_POS_SEL_CH0; /* 电压比较器的P端连接PA01 */
+    stcVcInit.u32InputNeg = VC_NEG_SEL_CH5; /* 电压比较器的N端连接内核VCAP */
+    stcVcInit.u32FilterClk  = VC_FILTER_CLK_RC256K; /* 滤波时钟RC256K */
+    stcVcInit.u32FilterMode = VC_FILTER_MD_NFM;     /* 普通滤波模式 */
+    stcVcInit.u32OutputPol  = VC_OUTPUT_POL_POS;    /* 输出极性正 */
+    stcVcInit.u32IntMode    = VC_INT_MD_FALLING;    /* 下降沿中断 */
+    stcVcInit.u8TrimSetSelect =
+        VC_TRIM_LOWER_0P5AVCC; /* 正端或负端的参考电压小于等于1/2 AVCC */
     VC_Init(&stcVcInit);
 
     VC_IntFlagClear(VC_CH1); /* 清除VC1中断标志 */

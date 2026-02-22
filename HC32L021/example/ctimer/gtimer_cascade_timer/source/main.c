@@ -21,10 +21,10 @@
 /******************************************************************************
  * Include files
  ******************************************************************************/
-#include "atim3.h"
-#include "ddl.h"
-#include "gpio.h"
-#include "gtim.h"
+#include "hc32l021_atim3.h"
+#include "hc32l021_ddl.h"
+#include "hc32l021_gpio.h"
+#include "hc32l021_gtim.h"
 /******************************************************************************
  * Local pre-processor symbols/macros ('#define')
  ******************************************************************************/
@@ -61,8 +61,7 @@ int32_t main(void)
 
     GTIM_Enable(GTIM0); /* 启动GTIM0运行 */
 
-    while (1)
-    {
+    while (1) {
         ;
     }
 }
@@ -75,22 +74,16 @@ void Ctim0_IRQHandler(void)
 {
     static boolean_t bFlag = FALSE;
 
-    if (TRUE == GTIM_IntFlagGet(GTIM0, GTIM_FLAG_UI))
-    {
-        if (FALSE == bFlag)
-        {
+    if (TRUE == GTIM_IntFlagGet(GTIM0, GTIM_FLAG_UI)) {
+        if (FALSE == bFlag) {
             STK_LED_ON(); /* 开启LED */
 
             bFlag = TRUE;
-        }
-        else if (TRUE == bFlag)
-        {
+        } else if (TRUE == bFlag) {
             STK_LED_OFF(); /* 关闭LED */
 
             bFlag = FALSE;
-        }
-        else
-        {
+        } else {
             ;
         }
 
@@ -104,23 +97,28 @@ void Ctim0_IRQHandler(void)
  */
 static void Gtim0Config(void)
 {
-    stc_gtim_init_t stcGtimInit = {0};
+    stc_gtim_init_t stcGtimInit = { 0 };
 
-    SYSCTRL_FuncDisable(SYSCTRL_FUNC_CTIMER0_USE_BTIM); /* 配置GTIM0有效，BTIM0/1/2无效 */
-    SYSCTRL_PeriphClockEnable(PeriphClockCtim0);        /* 使能CTIM0外设时钟 */
+    SYSCTRL_FuncDisable(
+        SYSCTRL_FUNC_CTIMER0_USE_BTIM); /* 配置GTIM0有效，BTIM0/1/2无效 */
+    SYSCTRL_PeriphClockEnable(PeriphClockCtim0); /* 使能CTIM0外设时钟 */
 
-    GTIM_StcInit(&stcGtimInit);                                    /* 结构体变量初始值初始化 */
-    stcGtimInit.u32OneShotEn           = GTIM_CONTINUOUS_COUNTER;  /* 连续计数模式 */
-    stcGtimInit.u32Mode                = GTIM_MD_EXTERN;           /* 工作模式: 计数器模式，计数时钟源来自TRS */
-    stcGtimInit.u32Prescaler           = GTIM_COUNTER_CLK_DIV1;    /* 对计数时钟进行预除频 */
-    stcGtimInit.u32ToggleEn            = GTIM_TOGGLE_DISABLE;      /* TOG输出禁止 */
-    stcGtimInit.u32TriggerSrc          = GTIM_TRIG_SRC_ITR3;       /* 触发源选择，TRS触发源未来自ITR3:ATIM3_TRGO */
-    stcGtimInit.u32ExternInputPolarity = GTIM_ETR_POLARITY_NORMAL; /* 外部ETP输入极性选择，此样例用于内部PCLK计数，不需要配置 */
-    stcGtimInit.u32AutoReloadValue     = 20 - 1;                   /* 自动重载寄存ARR赋值,计数周期为PRS*(ARR+1)*TPCLK */
+    GTIM_StcInit(&stcGtimInit); /* 结构体变量初始值初始化 */
+    stcGtimInit.u32OneShotEn = GTIM_CONTINUOUS_COUNTER; /* 连续计数模式 */
+    stcGtimInit.u32Mode =
+        GTIM_MD_EXTERN; /* 工作模式: 计数器模式，计数时钟源来自TRS */
+    stcGtimInit.u32Prescaler = GTIM_COUNTER_CLK_DIV1; /* 对计数时钟进行预除频 */
+    stcGtimInit.u32ToggleEn = GTIM_TOGGLE_DISABLE; /* TOG输出禁止 */
+    stcGtimInit.u32TriggerSrc =
+        GTIM_TRIG_SRC_ITR3; /* 触发源选择，TRS触发源未来自ITR3:ATIM3_TRGO */
+    stcGtimInit.u32ExternInputPolarity = GTIM_ETR_POLARITY_NORMAL; /* 外部ETP输入极性选择，此样例用于内部PCLK计数，不需要配置
+                                                                    */
+    stcGtimInit.u32AutoReloadValue =
+        20 - 1; /* 自动重载寄存ARR赋值,计数周期为PRS*(ARR+1)*TPCLK */
     GTIM_Init(GTIM0, &stcGtimInit);
 
-    GTIM_IntFlagClear(GTIM0, GTIM_FLAG_UI);          /* 清除溢出中断标志位 */
-    GTIM_IntEnable(GTIM0, GTIM_INT_UI);              /* 允许GTIM0溢出中断 */
+    GTIM_IntFlagClear(GTIM0, GTIM_FLAG_UI); /* 清除溢出中断标志位 */
+    GTIM_IntEnable(GTIM0, GTIM_INT_UI);     /* 允许GTIM0溢出中断 */
     EnableNvic(CTIM0_IRQn, IrqPriorityLevel3, TRUE); /* 开启中断 */
 }
 
@@ -130,27 +128,33 @@ static void Gtim0Config(void)
  */
 static void Atim3Config(void)
 {
-    stc_atim3_mode23_init_t           stcAtim3BaseConfig = {0};
-    stc_atim3_m23_master_slave_init_t stcMasterConfig    = {0};
+    stc_atim3_mode23_init_t stcAtim3BaseConfig        = { 0 };
+    stc_atim3_m23_master_slave_init_t stcMasterConfig = { 0 };
 
     /* ATIM3 外设时钟使能 */
     SYSCTRL_PeriphClockEnable(PeriphClockAtim3); /* 使能ATIM3 外设时钟 */
 
-    ATIM3_Mode23_StcInit(&stcAtim3BaseConfig);                                   /* 结构体变量初始值初始化 */
-    ATIM3_Mode23_MasterSlaveStcInit(&stcMasterConfig);                           /* 结构体变量初始值初始化 */
-    stcAtim3BaseConfig.u32WorkMode         = ATIM3_M23_M23CR_WORK_MODE_SAWTOOTH; /* 定时器模式 */
-    stcAtim3BaseConfig.u32CountClockSelect = ATIM3_M23_M23CR_CT_PCLK;            /* 定时器功能，计数时钟为内部PCLK */
-    stcAtim3BaseConfig.u32PRS              = ATIM3_M23_M23CR_ATIM3CLK_PRS1;      /* PCLK/1 */
-    stcAtim3BaseConfig.u32ShotMode         = ATIM3_M23_M23CR_SHOT_CYCLE;         /* 循环计数 */
-    stcAtim3BaseConfig.u32CountDir         = ATIM3_M23_M23CR_DIR_UP_CNT;         /* 向上计数 */
-    stcAtim3BaseConfig.u32URSSelect        = ATIM3_M23_M23CR_URS_OV_UND_UG_RST;  /* 更新源选择0 */
-    ATIM3_Mode23_Init(&stcAtim3BaseConfig);                                      /* ATIM3 的模式23功能初始化 */
+    ATIM3_Mode23_StcInit(&stcAtim3BaseConfig); /* 结构体变量初始值初始化 */
+    ATIM3_Mode23_MasterSlaveStcInit(
+        &stcMasterConfig); /* 结构体变量初始值初始化 */
+    stcAtim3BaseConfig.u32WorkMode =
+        ATIM3_M23_M23CR_WORK_MODE_SAWTOOTH; /* 定时器模式 */
+    stcAtim3BaseConfig.u32CountClockSelect =
+        ATIM3_M23_M23CR_CT_PCLK; /* 定时器功能，计数时钟为内部PCLK */
+    stcAtim3BaseConfig.u32PRS = ATIM3_M23_M23CR_ATIM3CLK_PRS1; /* PCLK/1 */
+    stcAtim3BaseConfig.u32ShotMode = ATIM3_M23_M23CR_SHOT_CYCLE; /* 循环计数 */
+    stcAtim3BaseConfig.u32CountDir = ATIM3_M23_M23CR_DIR_UP_CNT; /* 向上计数 */
+    stcAtim3BaseConfig.u32URSSelect =
+        ATIM3_M23_M23CR_URS_OV_UND_UG_RST; /* 更新源选择0 */
+    ATIM3_Mode23_Init(&stcAtim3BaseConfig); /* ATIM3 的模式23功能初始化 */
 
     ATIM3_Mode23_ARRSet(0xFFFFu); /* 设置重载值 */
     ATIM3_Mode23_Cnt16Set(0);     /* 设置计数初值 */
 
-    stcMasterConfig.u32MasterSrc = ATIM3_M23_MSCR_MMS_TRIG_SOURCE_UEV; /* 定时器事件更新UEV */
-    ATIM3_Mode23_MasterSlaveTrigSet(&stcMasterConfig);                 /* ATIM3 模式23 主从触发配置 */
+    stcMasterConfig.u32MasterSrc =
+        ATIM3_M23_MSCR_MMS_TRIG_SOURCE_UEV; /* 定时器事件更新UEV */
+    ATIM3_Mode23_MasterSlaveTrigSet(
+        &stcMasterConfig); /* ATIM3 模式23 主从触发配置 */
 }
 
 /******************************************************************************
