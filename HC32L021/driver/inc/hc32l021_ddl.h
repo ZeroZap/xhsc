@@ -34,7 +34,7 @@ extern "C" {
 #include "board_stkhc32l021.h"
 #include "hc32l021.h"
 #include "interrupts_hc32l021.h"
-#include "sysctrl.h"
+#include "hc32l021_sysctrl.h"
 #include "system_hc32l021.h"
 
 /**

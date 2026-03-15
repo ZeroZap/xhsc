@@ -26,7 +26,7 @@
 /******************************************************************************
  * Include files
  ******************************************************************************/
-#include "ddl.h"
+#include "hc32l021_ddl.h"
 
 /* C binding of definitions if building with C++ compiler */
 #ifdef __cplusplus

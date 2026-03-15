@@ -23,8 +23,8 @@
  * Include files
  ******************************************************************************/
 
-#include "spi.h"
-#include "ddl.h"
+#include "hc32l021_spi.h"
+#include "hc32l021_ddl.h"
 
 /**
  * @addtogroup HC32L021_DDL 驱动库
